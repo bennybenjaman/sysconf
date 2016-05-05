@@ -1,67 +1,56 @@
 #!/usr/bin/env bash
 
-# load utility functions
-source /home/giampaolo/.bashrc
-
-set -x
 set -e
 
+# load utility functions
+source ~/.bashrc
 
-PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+set -x
 
-
-install_pip() {
-    if ! type -P pip > /dev/null; then
-        if type -P curl > /dev/null; then
-            curl $PIP_URL > /tmp/get-pip.py
-        else
-            wget $PIP_URL /tmp/get-pip.py
-        fi
-        sudo python /tmp/get-pip.py
-    fi
-}
-
+if [ "$(id -u)" != "0" ]; then
+    echo "must be root"
+    exit 1
+fi
 
 # Ubuntu / Debian
 do_apt() {
     # add chrome ppa http://www.ubuntuupdates.org/ppa/google_chrome
-    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-    sudo rm /etc/apt/sources.list.d/google.list
-    sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+    rm /etc/apt/sources.list.d/google.list
+    sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 
     # add skype ppa http://www.ubuntugeek.com/how-to-install-skype-in-ubuntu-12-04precise.html
-    sudo apt-add-repository "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
+    apt-add-repository "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
 
-    sudo add-apt-repository "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
+    add-apt-repository "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
 
     # install all essential packages
     base="msttcorefonts vim build-essential ubuntu-restricted-extras rar unrar sudo"
     net="curl wget"
     dev="mercurial git colordiff libreadline-dev libncurses*-dev python-dev python3-dev build-essential ack-grep libffi-dev libssl-dev"
     media="vlc ffmpeg"
-    sys="screen htop virtualbox xawtv indicator-cpufreq"
+    sys="openssh-server screen htop virtualbox xawtv indicator-cpufreq"
     ppa="google-chrome-stable skype"
-    sudo apt-get update
-    sudo apt-get install -y $base $net $dev $media $sys $ppa
-    sudo apt-get install -y linux-headers-`uname -r`
+    apt-get update
+    apt-get install -y $base $net $dev $media $sys $ppa
+    apt-get install -y linux-headers-`uname -r`
     install_pip
-    sudo python -m pip install --upgrade thefuck
+    python -m pip install --upgrade thefuck
 }
 
 # FreeBSD (tipically)
 do_pkg() {
-    # install sudo (requires root)
-    if ! type -P sudo > /dev/null; then
+    # install (requires root)
+    if ! type -P > /dev/null; then
         cd /usr/ports/security/sudo/ && make install clean
     fi
 
     # install base packages
-    sudo pkg install -y git vim screen gcc wget curl
+    pkg install -y git vim screen gcc wget curl
 
     # install pip
-    install_pip
-
-    sudo python -m pip install --upgrade thefuck
+    sh-py-install-pip python
+    python -m pip install --upgrade thefuck
 }
 
 

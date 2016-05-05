@@ -296,11 +296,11 @@ function sh-py-install-pip() {
     # python 2.4 and 2.5
     if [ $1 = "python2.4" ] || [ $1 = "python2.5" ]; then
         sh-net-httpfetch https://bitbucket.org/pypa/setuptools/raw/bootstrap-py24/ez_setup.py > /tmp/ez_setup.py
-        sudo $1 /tmp/ez_setup.py
+        $1 /tmp/ez_setup.py
         if [ $1 = "python2.4" ]; then
-            sudo easy_install-2.4 pip==1.1
+            easy_install-2.4 pip==1.1
         else
-            sudo easy_install-2.5 pip==1.1
+            easy_install-2.5 pip==1.1
         fi
     # python 2.6+
     else
@@ -535,6 +535,7 @@ function sh-net-upload-sshkeys() {
 }
 
 
+
 # =============================================================================
 # Packages
 # =============================================================================
@@ -577,6 +578,9 @@ function sh-pkg-uninstall() {
     # osx
     elif type -P brew > /dev/null; then
         sudo brew uninstall $1
+    # freebsd
+    elif type -P pkg > /dev/null; then
+        pkg remove $1
     # freebsd
     elif type -P pkg_delete > /dev/null; then
         pkg_delete $1
@@ -692,38 +696,50 @@ function sh-path-size() {
 }
 
 
-# Append <str> to <file>. If <str> is already in <file> do nothing.
+# Append str <pattern> at EOF of <file>. If <pattern> is already at
+# EOF do nothing.
 # This is here as an utility fun for other bash scripts.
-function append-to-file() {
-    if [ -z "$1" ] || [ -z "$2" ]; then
-        echo "usage: append-to-file <file> <str>"
-        exit 1
-    fi
-    if [ ! -f $1 ]; then
-        # raise 'cause we're appending as root; don't want to create
-        # a file owned by root.
-        echo "file $1 not found!"
-        exit 1
-    fi
-    sudo grep -q -F "$2" "$1" || echo "$2" | sudo tee -a "$1"
+function _append_line_to_file() {
+    file=$1 pattern=$2 python << END
+if 1:
+    import os, sys
+    try:
+        file = os.environ['file']
+        pattern = os.environ['pattern']
+    except (KeyError, AssertionError):
+        sys.exit('usage: _append_line_to_file <fname> <pattern>')
+    with open(file, 'r') as f:
+        data = f.read()
+        data.rstrip()
+        last_line = data.splitlines()[-1]
+    if last_line != pattern:
+        with open(file, 'a') as f:
+            f.write(pattern.strip() + '\n')
+END
 }
 
 
-# Replace <src> with <dst> in <file>.
+# Replace str <src> with str <dst> in <file>.
 # This is here as an utility fun for other bash scripts.
-function replace-in-file() {
-    if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
-        echo "usage: replace-in-file <file> <src> <dst>"
-        exit 1
-    fi
-    if [ ! -f $1 ]; then
-        # raise just in case if the file does not exist sed will
-        # create it as root
-        echo "file $1 not found!"
-        exit 1
-    fi
-    sudo sed -i 's/$2/$3/g' $1
+function _replace_in_file() {
+    file=$1 src=$2 dst=$3 python << END
+if 1:
+    import os, sys
+    try:
+        file = os.environ['file']
+        src = os.environ['src']
+        dst = os.environ['dst']
+    except (KeyError, AssertionError):
+        sys.exit('usage: _replace_in_file <fname> <src> <dst>')
+    with open(file, 'r') as f:
+        data = f.read()
+    new_data = data.replace(src, dst)
+    if data != new_data:
+        with open(file, 'w') as f:
+            f.write(new_data)
+END
 }
+
 
 
 # ===========================================================================

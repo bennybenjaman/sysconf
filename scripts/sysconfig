@@ -1,19 +1,38 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# load utility functions
-source /home/giampaolo/.bashrc
 
-set -x
 set -e
 
+# load utility functions
+source ~/.bashrc
+
+
+if [ "$(id -u)" != "0" ]; then
+    echo "must be root"
+    exit 1
+fi
+
+set -x
+
+
+# ===================================================================
+# Linux
+# ===================================================================
 
 if [[ $PLATFORM    == *"linux"* ]]; then
     _set_sudo_no_passwd
 
     # disable error reports
-    append-to-file /etc/default/apport "enabled=0"
+    _append_line_to_file /etc/default/apport "enabled=0"
 
     # remove unwanted apps
-    sudo apt-get remove -y totem gedit
+    apt-get remove -y totem gedit
 fi
 
+
+# ===================================================================
+# All
+# ===================================================================
+
+# sshd config
+_append_line_to_file /etc/ssh/sshd_config "PermitRootLogin yes"
