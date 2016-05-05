@@ -3,9 +3,9 @@
     branches = branch -a
     ci = commit
     co = checkout
-    d = diff master
-    di = diff master
-    dif = diff master
+    d = diff
+    di = diff
+    dif = diff
     lo = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
     out = log origin/master..HEAD
     pu = pull -u -v
