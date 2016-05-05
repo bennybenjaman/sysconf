@@ -6,6 +6,7 @@
 
 SYSCONF_BIN_DIR="$(python -c 'import sysconf.lib; print(sysconf.lib.DIR_BIN)')"
 PLATFORM="$(python -c "import sys; print(sys.platform)")"
+PIP_URL="https://bootstrap.pypa.io/get-pip.py"
 _LAPTOP="N501VW" # laptop id
 _HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
 
@@ -303,7 +304,7 @@ function sh-py-install-pip() {
         fi
     # python 2.6+
     else
-        sh-net-httpfetch https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py
+        sh-net-httpfetch $PIP_URL > /tmp/get-pip.py
         if [ "$(id -u)" == "0" ]; then
             $1 /tmp/get-pip.py
         else
@@ -726,7 +727,7 @@ function replace-in-file() {
 
 
 # ===========================================================================
-# Terminal
+# Internal utils
 # ===========================================================================
 
 function _sh_term_git() {
@@ -750,6 +751,20 @@ function _sh_term_default() {
         PS1='\u@\[\033[01;31m\]\h\[\033[01;0m\]\w\$ '
     fi
 }
+
+# no passwd for sudo
+function _set_sudo_no_passwd() {
+    if [ ! -f /etc/sudoers ]; then
+        # linux
+        append-to-file /etc/sudoers "$USER ALL=(ALL) NOPASSWD: ALL"
+    elif [ ! -f /usr/local/etc/sudoers ]; then
+        # bsd
+        append-to-file /usr/local/etc/sudoers "$USER ALL=(ALL) NOPASSWD: ALL"
+    else
+        echo "can't find the sudoers file; is sudo instaled?"
+    fi
+}
+
 
 # =============================================================================
 # end of custom functions

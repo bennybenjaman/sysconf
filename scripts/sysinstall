@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # load utility functions
 source /home/giampaolo/.bashrc
@@ -7,6 +7,22 @@ set -x
 set -e
 
 
+PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+
+
+install_pip() {
+    if ! type -P pip > /dev/null; then
+        if type -P curl > /dev/null; then
+            curl $PIP_URL > /tmp/get-pip.py
+        else
+            wget $PIP_URL /tmp/get-pip.py
+        fi
+        sudo python /tmp/get-pip.py
+    fi
+}
+
+
+# Ubuntu / Debian
 do_apt() {
     # add chrome ppa http://www.ubuntuupdates.org/ppa/google_chrome
     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
@@ -28,12 +44,29 @@ do_apt() {
     sudo apt-get update
     sudo apt-get install -y $base $net $dev $media $sys $ppa
     sudo apt-get install -y linux-headers-`uname -r`
+    install_pip
+    sudo python -m pip install --upgrade thefuck
+}
+
+# FreeBSD (tipically)
+do_pkg() {
+    # install sudo (requires root)
+    if ! type -P sudo > /dev/null; then
+        cd /usr/ports/security/sudo/ && make install clean
+    fi
+
+    # install base packages
+    sudo pkg install -y git vim screen gcc wget curl
+
+    # install pip
+    install_pip
+
     sudo python -m pip install --upgrade thefuck
 }
 
 
-if [[ $PLATFORM == *"linux"* ]]; then
-    if type -P apt > /dev/null; then
-        do_apt
-    fi
+if type -P apt > /dev/null; then
+    do_apt
+elif type -P pkg > /dev/null; then
+    do_pkg
 fi
