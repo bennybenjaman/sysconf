@@ -1,0 +1,27 @@
+<snippet>
+    <content><![CDATA[
+"""
+APPNAME
+"""
+
+from setuptools import setup
+
+setup(
+    name='APPNAME',
+    author='Giampaolo Rodola',
+    description=__doc__,
+    long_description=open('README.rst').read(),
+    version='0.1',
+    packages=['APPNAME'],
+    include_package_data=True,
+    zip_safe=False,
+    entry_points={
+        'console_scripts': ['APPNAME = APPNAME.run:main'],
+    },
+)
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>setup.py</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.python</scope>
+</snippet>

@@ -1,0 +1,52 @@
+[ui]
+editor = vim
+username = Giampaolo Rodola' <g.rodola@gmail.com>
+ignore = ~/.hgignore
+merge = internal:merge
+
+[auth]
+gcode.prefix = https://code.google.com/
+gcode.username = g.rodola
+gcode.password = XXX
+
+[extensions]
+color =
+record =
+pager =
+hgext.graphlog =
+mq =
+progress =
+hgext.convert =
+churn =
+graphlog =
+purge =
+rebase =
+transplant =
+inotify =
+
+[diff]
+git = True
+
+[alias]
+import = import --no-commit
+
+[color]
+status.modified = yellow
+status.added = green
+status.removed = red
+status.deleted = magenta
+status.unknown = cyan
+status.ignored = cyan
+diff.diffline = bold
+diff.extended = cyan bold
+diff.file_a = red bold
+diff.file_b = green bold
+diff.hunk = yellow
+diff.deleted = red
+diff.inserted = green
+diff.changed = white
+diff.trailingwhitespace = bold red_background
+
+[pager]
+pager = LESS='FSRX' less
+ignore = version, help, update, serve, record

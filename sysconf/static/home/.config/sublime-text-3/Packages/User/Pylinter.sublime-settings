@@ -1,0 +1,15 @@
+{
+    // a list of strings of individual errors to disable, ex: ["C0301"]
+    "disable": ["C0301", "C0111", "C0103", "W0141", "W0142", "W0622", "R0904", "C0302", "W0703"],
+
+    // Show different icons for errors, warnings, etc.
+    "use_icons": true,
+
+    "disable_outline": true,
+
+    // Automatically run Pylinter when saving a Python document
+    "run_on_save": true,
+
+    // Don't hide pylint messages when moving the cursor
+    "message_stay": true,
+}

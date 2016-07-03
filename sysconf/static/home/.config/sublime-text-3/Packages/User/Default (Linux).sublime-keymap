@@ -1,0 +1,17 @@
+/*
+list of keys: http://docs.sublimetext.info/en/latest/reference/key_bindings.html
+list of commands: http://docs.sublimetext.info/en/latest/reference/commands.html
+*/
+[
+
+    {"keys": ["ctrl+shift+r"], "command": "reindent" , "args": {"single_line": false}},
+    { "keys": ["ctrl+keypad_plus"], "command": "increase_font_size" },
+    { "keys": ["ctrl+keypad_minus"], "command": "decrease_font_size" },
+    { "keys": ["ctrl+k"], "command": "toggle_side_bar" },
+    { "keys": ["ctrl+shift+c"], "command": "toggle_comment", "args": { "block": true }},
+    {"command": "anaconda_goto", "keys": ["ctrl+enter"]},
+    // http://stackoverflow.com/questions/16767732/sublime-text-2-how-to-jump-to-file-from-find-results-using-keyboard
+    { "keys": ["enter"], "command": "next_result", "context": [{"key": "selector",
+"operator": "equal", "operand": "text.find-in-files" }]},
+]
+

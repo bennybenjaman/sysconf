@@ -1,0 +1,59 @@
+{
+	"bold_folder_labels": true,
+	"caret_style": "phase",
+	"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+	"file_exclude_patterns":
+	[
+		"*.pyc",
+		"*.pyo",
+		"*.so",
+		"*~",
+		".*~",
+		"@*",
+		"#*#",
+		"*.orig",
+		"*.patch",
+		"*.rej",
+		"*.diff",
+		"*sublime*",
+		"*.hg*",
+		"*.bak"
+	],
+	"find_selected_text": true,
+	"folder_exclude_patterns":
+	[
+		".git",
+		"*build*",
+		"*dist*",
+		".svn",
+		".hg",
+		"*.egg-info",
+		"__pycache__"
+	],
+	"font_options":
+	[
+		"subpixel_antialias",
+		"no_bold"
+	],
+	"font_size": 11,
+	"highlight_line": false,
+	"highlight_modified_tabs": true,
+	"ignored_packages":
+	[
+		"Vintage",
+		"RestructuredText"
+	],
+	"line_padding_bottom": 0,
+	"line_padding_top": 0,
+	"rulers":
+	[
+		79
+	],
+	"soda_classic_tabs": true,
+	"soda_folder_icons": true,
+	"tab_completion": true,
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": true,
+	"word_wrap": true,
+	"ensure_newline_at_eof_on_save": true
+}

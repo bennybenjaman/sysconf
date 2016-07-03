@@ -1,0 +1,33 @@
+<snippet>
+    <content>
+import sys
+import unittest
+
+
+class TestCase(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_base(self):
+        pass
+
+
+def test_main():
+    test_suite = unittest.TestSuite()
+    test_suite.addTest(unittest.makeSuite(TestCase))
+    result = unittest.TextTestRunner(verbosity=2).run(test_suite)
+    return result.wasSuccessful()
+
+if __name__ == '__main__':
+    if not test_main():
+        sys.exit(1)
+    </content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>unittest</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.python</scope>
+</snippet>

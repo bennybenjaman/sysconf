@@ -1,0 +1,12 @@
+*.al
+*.bak
+*.egg-info
+*.la
+*.lo
+*.o
+*.orig
+*.pyc
+*.pyo
+*.rej
+*.so
+*.swp

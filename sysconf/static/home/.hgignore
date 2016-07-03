@@ -1,0 +1,16 @@
+syntax: glob
+*.pyc
+*.pyo
+*.swp
+*.o
+*.lo
+*.la
+*.al
+*.so
+*.rej
+*.orig
+*.svn-base/*
+*.svn/*
+
+syntax: re
+.*egg-info/.*

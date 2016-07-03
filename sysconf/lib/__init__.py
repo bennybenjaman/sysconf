@@ -1,0 +1,232 @@
+import errno
+import os
+import shutil
+import sys
+
+
+PYTHON = sys.executable
+HERE = os.path.abspath(os.path.dirname(__file__))
+
+
+# =============================================================================
+# --- paths
+# =============================================================================
+
+
+ROOTDIR = os.path.normpath(os.path.join(HERE, '..', '..'))
+BINDIR = os.path.join(ROOTDIR, 'sysconf/bin')
+STATICDIR = os.path.join(ROOTDIR, 'sysconf/static')
+STATICHOMEDIR = os.path.join(ROOTDIR, 'sysconf/static/home')
+HOMEDIR = os.path.expanduser("~")
+
+
+# =============================================================================
+# --- utils
+# =============================================================================
+
+
+def memoize(f):
+    """Memoize function or method return values, saving time if
+    method has already been called with that same argument.
+    """
+    cache= {}
+    def memf(*x):
+        if x not in cache:
+            cache[x] = f(*x)
+        return cache[x]
+    return memf
+
+
+@memoize
+def _term_supports_colors(file=sys.stdout):
+    try:
+        import curses
+        assert file.isatty()
+        curses.setupterm()
+        assert curses.tigetnum("colors") > 0
+    except Exception:
+        return False
+    else:
+        return True
+
+
+def hilite(s, ok=True, bold=False):
+    """Return an highlighted version of 'string'."""
+    if not _term_supports_colors():
+        return s
+    attr = []
+    if ok is None:  # no color
+        pass
+    elif ok:   # green
+        attr.append('32')
+    else:   # red
+        attr.append('31')
+    if bold:
+        attr.append('1')
+    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
+
+
+def log(prefix, s=None):
+    if not s:
+        print(hilite(s))
+    else:
+        print("%s: %s" % (hilite(prefix), s))
+
+
+def logerr(prefix, s=None):
+    if not s:
+        print(hilite(s, ok=False))
+    else:
+        print("%s: %s" % (hilite(prefix, ok=False), s))
+
+
+
+# =============================================================================
+# --- shell
+# =============================================================================
+
+
+def sh(cmd, sudo=False):
+    """run cmd in a subprocess; exit on error."""
+    if sudo:
+        raise NotImplementedError
+    print(hilite("sh: %s" % cmd))
+    ret = os.system(cmd)
+    if ret != 0:
+        raise SystemExit
+
+
+try:
+    from shutil import which
+except ImportError:
+    def which(cmd, mode=os.F_OK | os.X_OK, path=None):
+        """Given a command, mode, and a PATH string, return the path which
+        conforms to the given mode on the PATH, or None if there is no such
+        file.
+
+        `mode` defaults to os.F_OK | os.X_OK. `path` defaults to the result
+        of os.environ.get("PATH"), or can be overridden with a custom search
+        path.
+        """
+        def _access_check(fn, mode):
+            return (os.path.exists(fn) and os.access(fn, mode) and
+                    not os.path.isdir(fn))
+
+        if os.path.dirname(cmd):
+            if _access_check(cmd, mode):
+                return cmd
+            return None
+
+        if path is None:
+            path = os.environ.get("PATH", os.defpath)
+        if not path:
+            return None
+        path = path.split(os.pathsep)
+
+        if sys.platform == "win32":
+            if os.curdir not in path:
+                path.insert(0, os.curdir)
+
+            pathext = os.environ.get("PATHEXT", "").split(os.pathsep)
+            if any(cmd.lower().endswith(ext.lower()) for ext in pathext):
+                files = [cmd]
+            else:
+                files = [cmd + ext for ext in pathext]
+        else:
+            files = [cmd]
+
+        seen = set()
+        for dir in path:
+            normdir = os.path.normcase(dir)
+            if normdir not in seen:
+                seen.add(normdir)
+                for thefile in files:
+                    name = os.path.join(dir, thefile)
+                    if _access_check(name, mode):
+                        return name
+        return None
+
+
+# =============================================================================
+# --- fs utils
+# =============================================================================
+
+
+def symlink(source, linkname):
+    log("symlink", "%s -> %s" % (source, linkname))
+    os.symlink(source, linkname)
+
+
+def copy(src, dst):
+    parent = os.path.dirname(dst)
+    if parent:
+        safe_makedirs(parent)
+    log("cp (file)", "%s -> %s" % (src, dst))
+    shutil.copy(src, dst)
+
+
+def copydir(src, dst):
+    parent = os.path.dirname(dst)
+    if parent:
+        safe_makedirs(parent)
+    log("cp (dir)", "%s -> %s" % (src, dst))
+    shutil.copytree(src, dst)
+
+
+def safe_remove(path):
+    "Same as os.remove() but doesn't raise exception on missing file"
+    try:
+        os.remove(path)
+    except OSError, err:
+        if err.errno != errno.ENOENT:
+            raise
+    else:
+        log("rm", path)
+
+
+def safe_makedirs(path, mode=None):
+    "Same as os.makedirs() but doesn't raise exception if dir already exists"
+    try:
+        os.makedirs(path, **dict(mode=mode) if mode is not None else {})
+    except OSError, err:
+        if err.errno == errno.EEXIST:
+            if not os.path.isdir(path):
+                raise
+            elif mode is not None:
+                os.chmod(path, mode)
+        else:
+            raise
+    else:
+        log("mkdir -p", path)
+
+
+
+def safe_rmtree(path):
+    "Same as shutil.rmtree but doesn't raise exception if path does not exist"
+    def onerror(fun, path, excinfo):
+        exc = excinfo[1]
+        if exc.errno != errno.ENOENT:
+            raise
+
+    log("rmtree", path)
+    shutil.rmtree(path, onerror=onerror)
+
+
+def safe_rmpath(path):
+    """Removes a path either if it's a file or a directory.
+    If neither exist just do nothing.
+    """
+    if os.path.isdir(path):
+        safe_rmtree(path)
+    else:
+        safe_remove(path)
+
+
+def touch(name):
+    """Create a file and return its name."""
+    parent = os.path.dirname(name)
+    if parent:
+        safe_makedirs(parent)
+    with open(name, 'w') as f:
+        return f.name
+    log("touch", name)

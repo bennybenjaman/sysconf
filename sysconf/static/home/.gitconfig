@@ -1,0 +1,30 @@
+[alias]
+    br = branch
+    branches = branch -a
+    ci = commit
+    co = checkout
+    d = diff master
+    di = diff master
+    dif = diff master
+    lo = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
+    out = log origin/master..HEAD
+    pu = pull -u -v
+    pull-up = pull -u -v
+    st = status
+    tags = tag -n1 -l
+    gr = grep
+[user]
+	name = Giampaolo Rodola'
+	email = g.rodola@gmail.com
+[color]
+	branch = auto
+	diff = auto
+	interactive = auto
+	status = auto
+[core]
+	editor = vim
+	excludesfile = /home/giampaolo/.gitignore
+[merge]
+	#tool = meld
+[credential]
+	helper = cache --timeout=3600000000000000000000
