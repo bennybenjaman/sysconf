@@ -1,21 +1,6 @@
 #!/usr/bin/env bash
 
 # ===========================================================================
-# Custom .bashrc file.
-# Install it with:
-#   $ wget https://billiejoex.googlecode.com/hg/home/.bashrc --no-check-certificate -O ~/.bashrc && source ~/.bashrc
-#
-# ...or:
-#   $ curl https://billiejoex.googlecode.com/hg/home/.bashrc > ~/.bashrc && source ~/.bashrc
-#
-# ...Or:
-#   $ echo ". ~/svn/billiejoex/home/.bashrc" > ~/.bashrc && source ~/.bashrc
-#
-# Useful links:
-# - http://crunchbang.org/forums/viewtopic.php?id=1093&p=1
-# ===========================================================================
-
-# ===========================================================================
 # Extracted from default Ubuntu's .bashrc
 # ===========================================================================
 
@@ -93,7 +78,6 @@ fi
 
 # constants
 _LAPTOP="UX32VD" # laptop id
-_HG_REPO_URL="https://billiejoex.googlecode.com/hg"
 _HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
 
 # ~/bin is now in the list of exec dirs
@@ -493,40 +477,6 @@ function sh-myip() {
     sh-httpfetch icanhazip.com
 }
 
-# =============================================================================
-# Sync
-# =============================================================================
-
-# download latest .bashrc
-function sh-sync-bashrc() {
-    sh-httpfetch $_HG_REPO_URL/home/.bashrc ~/.bashrc
-    . ~/.bashrc
-}
-
-# download lates .vimrc
-function sh-sync-vimrc() {
-    sh-httpfetch $_HG_REPO_URL/home/.vimrc ~/.vimrc
-}
-
-# download lates .hgrc and .hgignore
-function sh-sync-hgrc() {
-    sh-httpfetch $_HG_REPO_URL/home/.hgrc ~/.hgrc ~/.hgrc
-    sh-httpfetch $_HG_REPO_URL/home/.hgignore ~/.hgignore
-}
-
-# download lates .gitconfig and .gitignore
-function sh-sync-gitrc() {
-    sh-httpfetch $_HG_REPO_URL/home/.gitconfig ~/.gitconfig
-    sh-httpfetch $_HG_REPO_URL/home/.gitignore ~/.gitignore
-}
-
-# download all
-function sh-sync-all() {
-    sh-sync-vimrc
-    sh-sync-hgrc
-    sh-sync-gitrc
-    sh-sync-bashrc
- }
 
 # =============================================================================
 # System

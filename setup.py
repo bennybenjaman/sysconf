@@ -2,10 +2,13 @@
 
 import os
 import pip  # NOQA
+import sys
 from setuptools import setup
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
+if os.name != 'posix':
+    sys.exit('UNIX only')
 
 
 def install_pkg():
@@ -26,8 +29,10 @@ def symlink_config_files():
     from sysconf.lib import safe_remove
     from sysconf.lib import STATICHOMEDIR
     from sysconf.lib import symlink
+    from sysconf.lib import logtitle
 
     # symlink '.' home files
+    logtitle("symlink home config files")
     for name in os.listdir(STATICHOMEDIR):
         src = os.path.join(STATICHOMEDIR, name)
         dst = os.path.join(HOMEDIR, name)

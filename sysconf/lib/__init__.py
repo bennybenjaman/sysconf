@@ -9,7 +9,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 
 # =============================================================================
-# --- paths
+# --- path constants
 # =============================================================================
 
 
@@ -18,6 +18,22 @@ BINDIR = os.path.join(ROOTDIR, 'sysconf/bin')
 STATICDIR = os.path.join(ROOTDIR, 'sysconf/static')
 STATICHOMEDIR = os.path.join(ROOTDIR, 'sysconf/static/home')
 HOMEDIR = os.path.expanduser("~")
+
+
+# =============================================================================
+# --- OS constants
+# =============================================================================
+
+
+POSIX = os.name == "posix"
+WINDOWS = os.name == "nt"
+LINUX = sys.platform.startswith("linux")
+OSX = sys.platform.startswith("darwin")
+FREEBSD = sys.platform.startswith("freebsd")
+OPENBSD = sys.platform.startswith("openbsd")
+NETBSD = sys.platform.startswith("netbsd")
+BSD = FREEBSD or OPENBSD or NETBSD
+SUNOS = sys.platform.startswith("sunos") or sys.platform.startswith("solaris")
 
 
 # =============================================================================
@@ -70,7 +86,7 @@ def log(prefix, s=None):
     if not s:
         print(hilite(s))
     else:
-        print("%s: %s" % (hilite(prefix), s))
+        print("%-20s: %s" % (hilite(prefix), s))
 
 
 def logerr(prefix, s=None):
@@ -78,6 +94,10 @@ def logerr(prefix, s=None):
         print(hilite(s, ok=False))
     else:
         print("%s: %s" % (hilite(prefix, ok=False), s))
+
+
+def logtitle(s):
+    print(hilite(">>> %s <<<" % s, bold=True))
 
 
 
