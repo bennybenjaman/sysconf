@@ -87,6 +87,8 @@ def main(argv=None):
     else:
         exts = DEFAULT_EXTS
     for i, ext in enumerate(exts):
+        if not ext.isalnum():
+            sys.exit("invalid extension %s" % ext)
         if not ext.startswith('.'):
             exts[i] = '.' + ext
     exts = set(exts)
