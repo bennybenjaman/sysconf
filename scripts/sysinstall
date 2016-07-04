@@ -7,7 +7,7 @@ set -x
 set -e
 
 
-do_linux() {
+do_apt() {
     # add chrome ppa http://www.ubuntuupdates.org/ppa/google_chrome
     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
     sudo rm /etc/apt/sources.list.d/google.list
@@ -32,5 +32,7 @@ do_linux() {
 
 
 if [[ $PLATFORM == *"linux"* ]]; then
-    do_linux
+    if type -P apt > /dev/null; then
+        do_apt
+    fi
 fi
