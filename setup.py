@@ -34,20 +34,28 @@ def install_pkg():
     )
 
 
-def confuser():
-    for name in os.listdir('sysconf/confuser'):
-        if not name.startswith('_') and name.endswith('.py'):
-            modname = 'sysconf.confuser.' + os.path.splitext(name)[0]
-            mod = importlib.import_module(modname)
-            mod.main()
+def run_scripts_in_dir(path):
+    from sysconf.lib import log
+    from sysconf.lib import logtitle
+    from sysconf.lib import SkipTask
 
+    for name in os.listdir(path):
+        if not name.startswith('_') and name.endswith('.py'):
+            modname = path.replace('/', '.') + '.' + os.path.splitext(name)[0]
+            logtitle("running %s" % modname)
+            mod = importlib.import_module(modname)
+            try:
+                mod.main()
+            except SkipTask as exc:
+                log("skip", str(exc))
+
+
+def confuser():
+    run_scripts_in_dir('sysconf/confuser')
 
 def confsys():
-    for name in os.listdir('sysconf/confsys'):
-        if not name.startswith('_') and name.endswith('.py'):
-            modname = 'sysconf.confsys.' + os.path.splitext(name)[0]
-            mod = importlib.import_module(modname)
-            mod.main()
+    run_scripts_in_dir('sysconf/confsys')
+
 
 
 def main():

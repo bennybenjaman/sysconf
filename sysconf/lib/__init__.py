@@ -1,4 +1,5 @@
 import errno
+import functools
 import os
 import shutil
 import sys
@@ -39,6 +40,10 @@ SUNOS = sys.platform.startswith("sunos") or sys.platform.startswith("solaris")
 # =============================================================================
 # --- utils
 # =============================================================================
+
+
+class SkipTask(Exception):
+    pass
 
 
 def memoize(f):
@@ -97,7 +102,21 @@ def logerr(prefix, s=None):
 
 
 def logtitle(s):
-    print(hilite(">>> %s <<<" % s, bold=True))
+    print(hilite("\n>>> %s <<<\n" % s, bold=True))
+
+
+
+def skip_if(condition=None, msg=None):
+    """Decorator to skip function execution."""
+    def decorator(fun):
+        @functools.wraps(fun)
+        def wrapper(*args, **kwargs):
+            if condition:
+                log("skip", msg or " ")
+            else:
+                return fun(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 

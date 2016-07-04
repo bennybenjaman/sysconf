@@ -12,7 +12,6 @@ from sysconf.lib import symlink
 
 
 def main():
-    logtitle("symlink home config files")
     for name in os.listdir(DIR_STATIC_HOME):
         src = os.path.join(DIR_STATIC_HOME, name)
         dst = os.path.join(DIR_HOME, name)

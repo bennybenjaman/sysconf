@@ -31,6 +31,6 @@ def pkg_linux():
 
 
 def main():
-    logtitle("install system packages")
+    logtitle("install system base packages")
     if LINUX:
         pkg_linux()
