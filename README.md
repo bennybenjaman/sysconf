@@ -1,10 +1,10 @@
-Personal (Giampaolo) system config utilities to install on a brand new UNIX
-system. This basically does 3 things:
+Personal  [Giampaolo](http://grodola.blogspot.com/p/about.html) system config
+utilities to install on a brand new UNIX system. This basically does 3 things:
 
 * install systems deps (python-dev, gcc, sudo, etc.) on different UNIX flavors
-  (Linux, FreeBSD)
+  (Linux, BSD, OSX, Solaris)
 * configure system files (e.g. add user to sudoers)
-* import user config files (e.g. .vimrc, .gitconfig)
+* symnlink user config files to this cloned repository (e.g. [.bashrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.bashrc), [.vimrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.vimrc), [.gitconfig](https://github.com/giampaolo/sysconf/blob/master/static/home/.gitconfig))
 
 Install it with:
 
@@ -23,4 +23,5 @@ make userconfig     # config user files
 make runall         # do the 3 above
 ```
 
-**WARNING**: these are settings to my system setup, so don't try this at home!
+**WARNING**: these are my personal system settings; your tastes may differ so
+be aware!
