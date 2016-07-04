@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 # ===========================================================================
+# Constants
+# ===========================================================================
+
+SYSCONF_BIN_DIR="$(python -c 'import sysconf.lib; print(sysconf.lib.DIR_BIN)')"
+_LAPTOP="N501VW" # laptop id
+_HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
+
+
+# ===========================================================================
 # Extracted from default Ubuntu's .bashrc
 # ===========================================================================
 
@@ -70,21 +79,22 @@ if ! shopt -oq posix; then
     fi
 fi
 
-# --- end
 
 # ===========================================================================
-# Set / Export
+# Set / Export / Config
 # ===========================================================================
 
-# constants
-_LAPTOP="UX32VD" # laptop id
-_HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
+# Webcam brightness (notebook only)
+if [ `hostname` = $_LAPTOP ]; then
+    v4lctl bright 100%
+fi
 
 # ~/bin is now in the list of exec dirs
 PATH="$HOME/bin:$PATH"
 
-# ...so is our revisioned bin dir
-PATH="$_HERE/bin:$PATH"
+# Add sysconf bin dir to PATH.
+PATH=$PATH:$SYSCONF_BIN_DIR
+
 
 # set English (instead of Italian) for commands output
 #export LANG=en_US.UTF-8
@@ -100,6 +110,8 @@ else
     export EDITOR="vi"
     export VISUAL="vi"
 fi
+
+# set paginator
 export PAGER="less"
 
 # save the history of multiple shells in a single file, see:
@@ -107,7 +119,7 @@ export PAGER="less"
 export HISTCONTROL=ignoredups:erasedups  # no duplicate entries
 export HISTSIZE=100000                   # big big history
 export HISTFILESIZE=100000               # big big history
-shopt -s histappend                      # append to history, don't overwrite it
+shopt -s histappend                # append to history, don't overwrite it
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 # http://code.activestate.com/recipes/578098-python-interpreter-auto-completion-and-history/
@@ -157,9 +169,9 @@ function cd() {
     fi
 
     if [ -d .git ]; then
-        sh-terminal-git
+        sh-term-git
     else
-        sh-terminal-default
+        sh-term-default
     fi
 }
 
@@ -170,22 +182,9 @@ alias git-pull='git pull -u -v'
 alias hg-ci-push='hg ci -m "progress" && hg push'
 alias hg-pull='hg pull -u -v'
 
-# saner svn diff
-function svn() {
-    case $* in
-        diff* ) shift 1; command svn diff | less -R ;;
-        * ) command svn "$@" ;;
-    esac
-}
-
 # command substitution
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
-# if [ `hostname` = $_LAPTOP ]; then
-#     if [ -d ~/.local/share/Trash/files ]; thend
-#         alias rm='mv -t ~/.local/share/Trash/files'
-#     fi
-# fi
 alias df='df -h'
 alias du='du -h -c'
 if [[ $OSTYPE == *linux* ]]; then
@@ -213,14 +212,6 @@ fi
 # defined by me
 # =============================================================================
 
-# Add sysconf bin dir to PATH.
-SYSCONF_BIN_DIR="$(python -c 'import sysconf.lib; print(sysconf.lib.DIR_BIN)')"
-PATH=$PATH:$SYSCONF_BIN_DIR
-
-# net
-alias sh-netstat-listen='sudo netstat -antp | grep LISTEN'
-alias sh-ping-google='ping google.com'
-
 
 # =============================================================================
 # Dev / Python
@@ -241,6 +232,22 @@ function sh-py-source-venv() {
     fi
 }
 
+# clean unnecessary files
+function sh-py-clean-build-files() {
+    $(which rm) -f `find . -type f -name \*.py[co]`
+    $(which rm) -f `find . -type f -name \*.so`
+    $(which rm) -f `find . -type f -name .\*~`
+    $(which rm) -f `find . -type f -name \*.orig`
+    $(which rm) -f `find . -type f -name \*.bak`
+    $(which rm) -f `find . -type f -name \*.rej`
+    $(which rm) -rf `find . -type d -name __pycache__`
+    $(which rm) -rf *.egg-info
+    if [ -f setup.py ]; then
+        $(which rm) -rf build
+        $(which rm) -rf dist
+    fi
+}
+
 # install python for the given python version
 function sh-py-install-pip() {
     if [ -z "$1" ] ; then
@@ -250,7 +257,7 @@ function sh-py-install-pip() {
 
     # python 2.4 and 2.5
     if [ $1 = "python2.4" ] || [ $1 = "python2.5" ]; then
-        sh-httpfetch https://bitbucket.org/pypa/setuptools/raw/bootstrap-py24/ez_setup.py > /tmp/ez_setup.py
+        sh-net-httpfetch https://bitbucket.org/pypa/setuptools/raw/bootstrap-py24/ez_setup.py > /tmp/ez_setup.py
         sudo $1 /tmp/ez_setup.py
         if [ $1 = "python2.4" ]; then
             sudo easy_install-2.4 pip==1.1
@@ -259,7 +266,7 @@ function sh-py-install-pip() {
         fi
     # python 2.6+
     else
-        sh-httpfetch https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py
+        sh-net-httpfetch https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py
         if [ "$(id -u)" == "0" ]; then
             $1 /tmp/get-pip.py
         else
@@ -413,8 +420,44 @@ function sh-py-pip-upgrade-all() {
 }
 
 
+# =============================================================================
+# Network
+# =============================================================================
+
+alias sh-net-netstat-listen='sudo netstat -antp | grep LISTEN'
+alias sh-net-ping-google='ping google.com'
+
+# ...in case wget/curl are missing
+# usage: sh-net-httpfetch <url> [<file>]
+function sh-net-httpfetch() {
+    url=$1 dest=$2 python << END
+from __future__ import print_function
+if 1:
+    import os, urllib2, sys
+    url = os.environ['url']
+    dest = os.environ['dest']
+    if not url:
+        sys.exit('usage: sh-net-httpfetch <url> [<file>]')
+    print("getting %s to %s" % (url, dest), file=sys.stderr)
+    if not '://' in url:
+        url = 'http://' + url
+    # try to disable cache
+    req = urllib2.Request(url)
+    req.add_header('Cache-Control', 'max-age=0')
+    req.add_header('Pragma', 'no-cache')
+    url = urllib2.urlopen(req)
+    data = url.read()
+    if dest:
+        f = open(dest, 'w')
+    else:
+        f = sys.stdout
+    with f:
+        f.write(data)
+END
+}
+
 # paste file on a pastebin-like service and return the generated url
-function sh-pastebin() {
+function sh-net-pastebin() {
     file=$1 python << END
 if 1:
     import urllib, urllib2, os, sys
@@ -434,41 +477,15 @@ if 1:
 END
 }
 
-# =============================================================================
-# Network
-# =============================================================================
 
-# ...in case wget/curl are missing
-# usage: sh-httpfetch <url> [<file>]
-function sh-httpfetch() {
-    url=$1 dest=$2 python << END
-from __future__ import print_function
-if 1:
-    import os, urllib2, sys
-    url = os.environ['url']
-    dest = os.environ['dest']
-    if not url:
-        sys.exit('usage: sh-httpfetch <url> [<file>]')
-    print("getting %s to %s" % (url, dest), file=sys.stderr)
-    if not '://' in url:
-        url = 'http://' + url
-    # try to disable cache
-    req = urllib2.Request(url)
-    req.add_header('Cache-Control', 'max-age=0')
-    req.add_header('Pragma', 'no-cache')
-    url = urllib2.urlopen(req)
-    data = url.read()
-    if dest:
-        f = open(dest, 'w')
-    else:
-        f = sys.stdout
-    with f:
-        f.write(data)
-END
+# show public ip
+function sh-net-myip() {
+    sh-net-httpfetch icanhazip.com
 }
 
+
 # add your public SSH key to a remote host
-function sh-ssh-add-remote-keys() {
+function sh-net-upload-sshkeys() {
     if [ -z "$1" ] || [ -z "$2" ]; then
         echo "usage: ssh-add-remote-keys <user> <remote-ip> "
         return
@@ -477,18 +494,13 @@ function sh-ssh-add-remote-keys() {
     echo "done"
 }
 
-# show public ip
-function sh-myip() {
-    sh-httpfetch icanhazip.com
-}
-
 
 # =============================================================================
-# System
+# Packages
 # =============================================================================
 
 # install package
-function sh-install() {
+function sh-pkg-install() {
     if [ -z "$1" ]; then
         echo "usage: sh-install <pkg-name> "
         return
@@ -512,7 +524,7 @@ function sh-install() {
 }
 
 # remove package
-function sh-uninstall() {
+function sh-pkg-uninstall() {
     if [ -z "$1" ]; then
         echo "usage: sh-uninstall <pkg-name> "
         return
@@ -535,7 +547,7 @@ function sh-uninstall() {
 
 # shows apt history
 if type -P vim > /dev/null; then
-    function sh-apt-history() {
+    function sh-pkg-history() {
         case "$1" in
             install)
                 cat /var/log/dpkg.log | grep 'install '
@@ -556,35 +568,13 @@ if type -P vim > /dev/null; then
     }
 fi
 
-# turn off keyboard backlight
-if [ `hostname` = $_LAPTOP ]; then
-    function sh-keyboard-turnoff-backlight() {
-        echo 0 | sudo tee /sys/class/leds/asus::kbd_backlight/brightness > /dev/null
-    }
-    sh-keyboard-turnoff-backlight
-fi
 
 # =============================================================================
 # Files
 # =============================================================================
 
-# clean unnecessary files
-function sh-clean-buid-files() {
-    $(which rm) -f `find . -type f -name \*.py[co]`
-    $(which rm) -f `find . -type f -name \*.so`
-    $(which rm) -f `find . -type f -name .\*~`
-    $(which rm) -f `find . -type f -name \*.orig`
-    $(which rm) -f `find . -type f -name \*.bak`
-    $(which rm) -f `find . -type f -name \*.rej`
-    $(which rm) -rf `find . -type d -name __pycache__`
-    $(which rm) -rf *.egg-info
-    #$(which rm) -rf build
-    #$(which rm) -rf dist
-    #$(which rm) -rf docs/_build
-}
-
 # extract all archives just by typing 'extract arch.ext'
-function sh-extract-archive() {
+function sh-arch-extract() {
     if [ -f $1 ] ; then
         case $1 in
             *.tar.bz2)   tar xvjf $1;;
@@ -606,15 +596,12 @@ function sh-extract-archive() {
     fi
 }
 
-# creates an archive from given directory
-function sh-mktgz() { tar cvzf "${1%%/}.tar.gz"  "${1%%/}/"; }
-function sh-mkbz2() { tar cvjf "${1%%/}.tar.bz2" "${1%%/}/"; }
 
 # ===========================================================================
-# Others
+# Terminal
 # ===========================================================================
 
-function sh-terminal-git() {
+function sh-term-git() {
     if [[ $OSTYPE == *linux-gnu* ]]; then
         if [ "$PS1" ]; then
             if [ "$BASH" ]; then
@@ -623,10 +610,10 @@ function sh-terminal-git() {
             fi
         fi
     fi
-    sh-terminal-default
+    sh-term-default
 }
 
-function sh-terminal-default() {
+function sh-term-default() {
     if [ `hostname` = $_LAPTOP ]; then
         :
         PS1='\[\033[01;0m\]\w\$ '
@@ -648,10 +635,12 @@ function _pip_completion() {
 }
 complete -o default -F _pip_completion pip
 
-# SSH remote completion XXX / TODO: test this
+# bash completion
 if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
+
+# SSH completion (TODO: test this)
 if [ -f ~/.ssh/known_hosts ]; then
     SSH_COMPLETE=( $(cat ~/.ssh/known_hosts | \
     cut -f 1 -d ' ' | \
@@ -664,19 +653,14 @@ fi
 # completion for sudo
 complete -cf sudo
 
-# webcam (notebook only)
-if [ `hostname` = $_LAPTOP ]; then
-    v4lctl bright 100%
-fi
-
-# terminal prefix + welcome message
+_brown='\e[0;33m'
+_nc='\e[0m'
 # _black='\e[0;30m'
 # _blue='\e[0;34m'
 # _green='\e[0;32m'
 # _cyan='\e[0;36m'
 # _red='\e[0;31m'
 # _purple='\e[0;35m'
-_brown='\e[0;33m'
 # _lightgray='\e[0;37m'
 # _darkgray='\e[1;30m'
 # _lightblue='\e[1;34m'
@@ -686,8 +670,8 @@ _brown='\e[0;33m'
 # _lightpurple='\e[1;35m'
 # _yellow='\e[1;33m'
 # _white='\e[1;37m'
-_nc='\e[0m'
 
+# Print system info when a new shell is opened
 function _print_sysinfo() {
     echo -en "${_brown}"
     echo -e "${_brown}Hostname: `hostname`"
@@ -700,14 +684,13 @@ function _print_sysinfo() {
         echo -e "Arch:     32-bit"
     fi
     echo -e "Python:   `python -c 'import sys; sys.stdout.write(sys.version.split()[0])'`"
-#    echo -e "================================================================="
     echo -en "${_nc}"
 }
 
 _print_sysinfo
 
 if [ -d .git ]; then
-    sh-terminal-git
+    sh-term-git
 else
-    sh-terminal-default
+    sh-term-default
 fi

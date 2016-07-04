@@ -6,5 +6,6 @@ from sysconf.lib import str_in_file
 
 @skip_if(not LINUX)
 def main():
+    from nose.tools import set_trace; set_trace()
     if not str_in_file("enabled=0", "/etc/default/apport"):
         sh('echo "enabled=0" | sudo tee -a /etc/default/apport')
