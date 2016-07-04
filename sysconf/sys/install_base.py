@@ -13,7 +13,7 @@ from sysconf.lib import sh
 def pkg_linux():
     BASE = ["msttcorefonts", "vim", "",
             "ubuntu-restricted-extras", "rar", "unrar"]
-    ADMIN = ["screen", "htop", "virtualbox", "curl", "realpath"]
+    ADMIN = ["screen", "htop", "virtualbox", "curl"]
     DEV = ["mercurial", "git", "colordiff", "libreadline-dev",
            "libncurses*-dev", "python-dev", "python3-dev", "ack-grep",
            "build-essential", "libffi-dev", "libssl-dev"]

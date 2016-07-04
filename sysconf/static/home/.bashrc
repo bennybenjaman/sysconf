@@ -233,6 +233,15 @@ if type -P vim > /dev/null; then
     alias vi="vim"
 fi
 
+# substitute for 'realpath' cmd, which is not always available
+function realpath() {
+    if [ -z "$1" ] ; then
+        echo "usage: realpath <path>"
+        return
+    fi
+    python -c "import os; print(os.path.realpath(os.path.normpath('$1')))"
+}
+
 # =============================================================================
 # User defined utility functions start here.
 # All starts with "sh-" namespace so that I can distinguish the ones
@@ -531,7 +540,7 @@ function sh-net-upload-sshkeys() {
 # install package
 function sh-pkg-install() {
     if [ -z "$1" ]; then
-        echo "usage: sh-install <pkg-name> "
+        echo "usage: sh-pkg-install <pkg-name> "
         return
     fi
     # TODO: better handling of auth (sudo)
@@ -548,14 +557,14 @@ function sh-pkg-install() {
     elif type -P pkg_add > /dev/null; then
         pkg_add -r $1
     else
-        eho "system not supported"
+        echo "system not supported"
     fi
 }
 
 # remove package
 function sh-pkg-uninstall() {
     if [ -z "$1" ]; then
-        echo "usage: sh-uninstall <pkg-name> "
+        echo "usage: sh-pkg-uninstall <pkg-name> "
         return
     fi
 
@@ -574,8 +583,53 @@ function sh-pkg-uninstall() {
     fi
 }
 
+# search package
+function sh-pkg-search() {
+    if [ -z "$1" ]; then
+        echo "usage: sh-pkg-search <pkg-name> "
+        return
+    fi
+    # TODO: better handling of auth (sudo)
+    # ubuntu / debian
+    if type -P apt > /dev/null; then
+        sudo apt-cache search $1
+    # osx
+    elif type -P brew > /dev/null; then
+        echo TODO
+    # freebsd
+    elif type -P pkg > /dev/null; then
+        echo TODO
+    # freebsd
+    elif type -P pkg_add > /dev/null; then
+        echo TODO
+    else
+        echo "system not supported"
+    fi
+}
+
+
+# search package
+function sh-pkg-list-installed() {
+    # ubuntu / debian
+    if type -P dpkg > /dev/null; then
+        sudo dpkg -l
+    # osx
+    elif type -P brew > /dev/null; then
+        echo TODO
+    # freebsd
+    elif type -P pkg > /dev/null; then
+        echo TODO
+    # freebsd
+    elif type -P pkg_add > /dev/null; then
+        echo TODO
+    else
+        echo "system not supported"
+    fi
+}
+
+
 # shows apt history
-if type -P vim > /dev/null; then
+if type -P dpkg > /dev/null; then
     function sh-pkg-history() {
         case "$1" in
             install)
@@ -599,7 +653,7 @@ fi
 
 
 # =============================================================================
-# Files
+# Paths
 # =============================================================================
 
 # extract all archives just by typing 'extract arch.ext'
