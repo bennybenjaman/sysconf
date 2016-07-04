@@ -7,6 +7,7 @@ import os
 from sysconf.lib import DIR_HOME
 from sysconf.lib import DIR_STATIC_HOME
 from sysconf.lib import safe_remove
+from sysconf.lib import sh
 from sysconf.lib import symlink
 
 
@@ -17,3 +18,5 @@ def main():
         if name.startswith('.') and os.path.isfile(src):
             safe_remove(dst)
             symlink(src, dst)
+
+    sh("git config --global push.default simple")
