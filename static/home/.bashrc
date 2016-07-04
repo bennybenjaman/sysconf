@@ -4,11 +4,10 @@
 # Constants
 # ===========================================================================
 
-SYSCONF_BIN_DIR="$(python -c 'import sysconf.lib; print(sysconf.lib.DIR_BIN)')"
 PLATFORM="$(python -c "import sys; print(sys.platform)")"
 PIP_URL="https://bootstrap.pypa.io/get-pip.py"
-_LAPTOP="N501VW" # laptop id
-_HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
+LAPTOP="N501VW"  # mt hostname / laptop id
+HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
 
 
 # ===========================================================================
@@ -87,7 +86,9 @@ fi
 # ===========================================================================
 
 # Webcam brightness (notebook only)
-if [ `hostname` = $_LAPTOP ]; then
+# TODO: this is slow; may want to run this in a subprocess (nohup?)
+# or move it elsewhere.
+if [ `hostname` = $LAPTOP ]; then
     v4lctl bright 100%
 fi
 
@@ -172,7 +173,7 @@ fi
 # ===========================================================================
 
 # ls (also see: http://www.noah.org/engineering/dotfiles/.bashrc)
-if [[ $OSTYPE == *linux* ]]; then
+if [[ $PLATFORM == *linux* ]]; then
     alias ls='ls -hF --color --group-directories-first --time-style=+"%Y-%m-%d %H:%M"'
 else
     export CLICOLOR=1
@@ -201,6 +202,7 @@ function cd() {
         builtin cd ~ && ls
     fi
 
+    # if I'm in a GIT directory, make it look cool
     if [ -d .git ]; then
         _sh_term_git
     else
@@ -215,6 +217,12 @@ alias git-pull='git pull -u -v'
 alias hg-ci-push='hg ci -m "progress" && hg push'
 alias hg-pull='hg pull -u -v'
 
+# editors
+alias s='subl'
+if type -P vim > /dev/null; then
+    alias vi="vim"
+fi
+
 # command substitution
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
@@ -227,18 +235,6 @@ alias reload='source ~/.bashrc'  # 'real' reload is a trap
 alias wget='wget -N --no-check-certificate'  # overwrite, don't check SSL cert
 alias ssh='ssh -o StrictHostKeyChecking=no'  # don't propt "are you sure...?"
 
-# shutdown / restart / suspend
-alias shutdown-now='sudo shutdown -h now'
-alias shutdown-restart='sudo shutdown -r now'
-alias shutdown-suspend='sudo pm-suspend'
-
-alias s='subl'
-
-# editor
-if type -P vim > /dev/null; then
-    alias vi="vim"
-fi
-
 # substitute for 'realpath' cmd, which is not always available
 function realpath() {
     if [ -z "$1" ] ; then
@@ -250,8 +246,7 @@ function realpath() {
 
 # =============================================================================
 # User defined utility functions start here.
-# All starts with "sh-" namespace so that I can distinguish the ones
-# defined by me
+# All starts with "sh-" namespace so that I won't pollute PATH namespace.
 # =============================================================================
 
 
@@ -764,7 +759,7 @@ function _sh_term_git() {
 }
 
 function _sh_term_default() {
-    if [ `hostname` = $_LAPTOP ]; then
+    if [ `hostname` = $LAPTOP ]; then
         :
         PS1='\[\033[01;0m\]\w\$ '
         #PS1='\[\033[01;30m\]\u\[\033[01;30m\]@\[\033[01;31m\]\h\[\033[00;34m\]:\[\033[01;35m\]\w\[\033[00;34m\]\[\033[01;30m\]$\[\033[00m\] '

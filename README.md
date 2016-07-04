@@ -1,4 +1,4 @@
-Personal  [Giampaolo](http://grodola.blogspot.com/p/about.html) system config
+Personal ([Giampaolo](http://grodola.blogspot.com/p/about.html)) system config
 utilities to install on a brand new UNIX system. This basically does 3 things:
 
 * install systems deps (python-dev, gcc, sudo, etc.) on different UNIX flavors
