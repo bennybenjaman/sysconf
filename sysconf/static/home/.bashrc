@@ -213,17 +213,14 @@ fi
 # defined by me
 # =============================================================================
 
+# Add sysconf bin dir to PATH.
+SYSCONF_BIN_DIR="$(python -c 'import sysconf.lib; print(sysconf.lib.DIR_BIN)')"
+PATH=$PATH:$SYSCONF_BIN_DIR
+
 # net
 alias sh-netstat-listen='sudo netstat -antp | grep LISTEN'
 alias sh-ping-google='ping google.com'
 
-# =============================================================================
-# Custom scripts
-# =============================================================================
-
-function sh-rreplace() {
-    python -c "import sys; from sysconf.bin.rreplace import main; main()"
-}
 
 # =============================================================================
 # Dev / Python

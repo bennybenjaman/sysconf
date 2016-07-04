@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 
+# TODO: case-insnsitive
+# TODO: file-ext = * should grep all files
+
 """
 Recursively grep (or replaces) occurrences of <str> in all "dev" files
 in this directory.  Very similar to "ack" CLI util."
 
 Usage:
-    grep.py [-r <str>] [-e <exts>] [-v] <str>
+    grep.py [-r <str>] [-e <exts>] [-i] [-v] <str>
 
 Options:
     -r <str> --replace=<str>  # replace string
     -e <exts> --exts=<exts>   # a list of extensions default=%s
-    -v --verbose              # print line occurrences
+
+Examples:
+    grep.py -e py,c,h pattern          # extensions
+    grep.py -r bar foo                 # replaces 'foo' with 'bar'
 """
 
 from __future__ import print_function
@@ -38,7 +44,7 @@ IGNORE_ROOT_DIRS = [
 __doc__ = __doc__ % str(tuple(DEFAULT_EXTS))
 
 
-def grep_file(filepath, pattern, replace=None, verbose=False):
+def grep_file(filepath, pattern, replace=None):
     def print_occurrences(data):
         for lineno, line in enumerate(data.splitlines(), 1):
             if pattern in line:
@@ -79,7 +85,6 @@ def main(argv=None):
     exts = set(exts)
     pattern = args['<str>']
     replace = args['--replace']
-    verbose = args['--verbose']
 
     # run
     files_matching = 0
@@ -96,7 +101,7 @@ def main(argv=None):
                 continue
             filepath = os.path.join(root, name)
             ocs = grep_file(
-                filepath, pattern, replace=replace, verbose=verbose)
+                filepath, pattern, replace=replace)
             occurrences += ocs
             if ocs:
                 files_matching += 1
