@@ -62,17 +62,17 @@ do_apt() {
     add-apt-repository "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
 
     # install all essential packages
-    base="msttcorefonts vim build-essential ubuntu-restricted-extras rar unrar sudo"
+    base="msttcorefonts vim build-essential ubuntu-restricted-extras sudo"
     net="curl wget"
-    dev="mercurial git colordiff libreadline-dev libncurses*-dev python-dev python3-dev build-essential ack-grep libffi-dev libssl-dev"
+    files="tree rar unrar"
+    dev="git mercurial colordiff libreadline-dev libncurses*-dev python-dev python3-dev build-essential ack-grep libffi-dev libssl-dev libreadline-dev"
     media="vlc ffmpeg"
     sys="openssh-server screen htop virtualbox xawtv indicator-cpufreq"
     ppa="google-chrome-stable skype"
     apt-get update
-    apt-get install -y $base $net $dev $media $sys $ppa
+    apt-get install -y $base $net $files $dev $media $sys $ppa
     apt-get install -y linux-headers-`uname -r`
-    install_pip
-    python -m pip install --upgrade thefuck
+    apt-get autoremove -y
 }
 
 

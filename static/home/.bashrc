@@ -5,6 +5,7 @@
 # ===========================================================================
 
 PLATFORM="$(python -c "import sys; print(sys.platform)")"
+SYSCONF_BIN_DIR="$(python -c "import sysconf; print(sysconf.DIR_BIN)")"
 PIP_URL="https://bootstrap.pypa.io/get-pip.py"
 LAPTOP="N501VW"  # mt hostname / laptop id
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
@@ -80,10 +81,19 @@ if ! shopt -oq posix; then
     fi
 fi
 
+# set English (instead of Italian) for commands output
+#export LANG=en_US.UTF-8
+
 
 # ===========================================================================
-# Set / export / config
+# Custom settings
 # ===========================================================================
+
+# ~/bin is now in the list of exec dirs
+PATH="$HOME/bin:$PATH"
+
+# Add sysconf bin dir to PATH.
+PATH=$PATH:$SYSCONF_BIN_DIR
 
 # Webcam brightness (notebook only)
 # TODO: this is slow; may want to run this in a subprocess (nohup?)
@@ -92,27 +102,8 @@ if [ `hostname` = $LAPTOP ]; then
     v4lctl bright 100%
 fi
 
-# ~/bin is now in the list of exec dirs
-PATH="$HOME/bin:$PATH"
-
-# Add sysconf bin dir to PATH.
-PATH=$PATH:$SYSCONF_BIN_DIR
-
-
-# set English (instead of Italian) for commands output
-#export LANG=en_US.UTF-8
-
 # don't use ^D to exit
 set -o ignoreeof
-
-# set default programs
-if type -P vim > /dev/null; then
-    export EDITOR="vim"
-    export VISUAL="vim"
-else
-    export EDITOR="vi"
-    export VISUAL="vi"
-fi
 
 # set paginator
 export PAGER="less"
@@ -190,11 +181,7 @@ alias ls-tree='tree -Cs'        # nice alternative to 'ls'
 alias ls-dirs='ls -l | grep "^d"'   #list only directories
 alias ls-files='ls -l | grep -v "^d"'   #list only file
 
-# navigation
-alias ..='cd ..'
-alias cd..='cd ..'
-
-# automatically do an ls after each cd
+# cd - automatically do an ls after each cd
 function cd() {
     if [ -n "$1" ]; then
         builtin cd "$@" && ls
@@ -209,31 +196,50 @@ function cd() {
         _sh_term_default
     fi
 }
+alias ..='cd ..'
+alias cd..='cd ..'
 
-# dev
+# git
 alias g='git'
 alias git-ci-push='git ci -a -m "progress" && git push'
 alias git-pull='git pull -u -v'
+
+# mercurial
 alias hg-ci-push='hg ci -m "progress" && hg push'
 alias hg-pull='hg pull -u -v'
 
-# editors
+# sublime
 alias s='subl'
+
+# vim
 if type -P vim > /dev/null; then
+    export EDITOR="vim"
+    export VISUAL="vim"
     alias vi="vim"
+else
+    export EDITOR="vi"
+    export VISUAL="vi"
 fi
 
-# command substitution
+# grep (and variants)
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
-alias df='df -h'
-alias du='du -h -c'
 if [[ $OSTYPE == *linux* ]]; then
     alias grep='grep --color=auto --exclude=*.pyc --exclude=*.orig --exclude=*.rej --exclude-dir=.svn --exclude-dir=.egg-info --exclude-dir=.hg --exclude-dir=.git'
 fi
-alias reload='source ~/.bashrc'  # 'real' reload is a trap
-alias wget='wget -N --no-check-certificate'  # overwrite, don't check SSL cert
-alias ssh='ssh -o StrictHostKeyChecking=no'  # don't propt "are you sure...?"
+
+# df
+alias df='df -h'
+alias du='du -h -c'
+
+# map reload to source (original reload is a trap)
+alias reload='source ~/.bashrc'
+
+# wget - overwrite by default, don't check SSL cert
+alias wget='wget -N --no-check-certificate'
+
+# ssh - don't propt "are you sure...(y|n)?"
+alias ssh='ssh -o StrictHostKeyChecking=no'
 
 # substitute for 'realpath' cmd, which is not always available
 function realpath() {
