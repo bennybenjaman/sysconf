@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 """
+CIao ciao.
+
 Usage:
-    make install                             # install all
-    setup.py user|sys <subcmd>       # run specific subcmd
+    setup sysinstall
+    setup sysconfig
+    setup userconfig
 """
 
 
@@ -41,63 +44,43 @@ def install_pkg():
     )
 
 
-def run_script_by_path(path):
-    from sysconf.lib import log
-    from sysconf.lib import logtitle
-    from sysconf.lib import SkipTask
-
-    if path.endswith('.py'):
-        path = os.path.splitext(path)[0]
-    modname = path.replace('/', '.')
-    logtitle("running %s" % modname)
-    mod = importlib.import_module(modname)
-    try:
-        mod.main()
-    except SkipTask as exc:
-        log("skip", str(exc))
+def run_sysinstall():
+    from sysconf.lib import sh, logtitle
+    logtitle('running sys install')
+    sh("./scripts/sysinstall", sudo=True)
 
 
-def run_scripts_in_dir(path):
-    for name in sorted(os.listdir(path)):
-        if not name.startswith('_') and name.endswith('.py'):
-            run_script_by_path(os.path.join(path, name))
+def run_sysconfig():
+    from sysconf.lib import sh, logtitle
+    logtitle('running sys config')
+    sh("./scripts/sysconfig", sudo=True)
+
+
+def run_userconfig():
+    from sysconf.lib import sh, logtitle
+    logtitle('running user config')
+    sh("./scripts/userconfig")
+
+
+def run_all():
+    run_sysinstall()
+    run_sysconfig()
+    run_userconfig()
 
 
 def main():
     if sys.argv == ['setup.py', 'develop', '--user']:
         install_pkg()
-        run_scripts_in_dir('sysconf/user')
-        run_scripts_in_dir('sysconf/sys')
+        run_all()
     else:
-        # CLI parser
-        from sysconf.lib import hilite
-
-        def get_avail_subcmds(subcmd):
-            ls = []
-            for name in sorted(os.listdir('sysconf/' + subcmd)):
-                if not name.startswith('_') and name.endswith('.py'):
-                    ls.append(name)
-            return ls
-
-
-        if len(sys.argv) < 2:
-            return sys.exit(__doc__.strip())
-
-        subcmd = sys.argv[1]
-        if subcmd not in ('user', 'sys'):
-            sys.exit(__doc__.strip())
-
-        # list sub cmds
-        if len(sys.argv) == 2:
-            subs = get_avail_subcmds(subcmd)
-            print("available sub commands:")
-            for name in subs:
-                print "  " + hilite(os.path.splitext(name)[0], ok=None, bold=1)
-        # execute sub cmd
-        else:
-            run_script_by_path(os.path.join('sysconf', subcmd, sys.argv[2]))
-
-
+        from docopt import docopt
+        args = docopt(__doc__)
+        if args['sysinstall']:
+            run_sysinstall()
+        elif args['sysconfig']:
+            run_sysconfig()
+        elif args['userconfig']:
+            run_userconfig()
 
 
 if __name__ == '__main__':

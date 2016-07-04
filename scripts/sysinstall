@@ -1,16 +1,53 @@
 #!/usr/bin/env bash
 
 set -e
-
-# load utility functions
-source ~/.bashrc
-
 set -x
 
+PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+
 if [ "$(id -u)" != "0" ]; then
-    echo "must be root"
-    exit 1
+    echo "must be root" && exit 1
 fi
+
+
+# ...in case wget/curl are missing
+# usage: sh_net_httpfetch <url> [<file>]
+sh_net_httpfetch() {
+    url=$1 dest=$2 python << END
+from __future__ import print_function
+if 1:
+    import os, urllib2, sys
+    url = os.environ['url']
+    dest = os.environ['dest']
+    if not url:
+        sys.exit('usage: sh_net_httpfetch <url> [<file>]')
+    print("getting %s to %s" % (url, dest), file=sys.stderr)
+    if not '://' in url:
+        url = 'http://' + url
+    # try to disable cache
+    req = urllib2.Request(url)
+    req.add_header('Cache-Control', 'max-age=0')
+    req.add_header('Pragma', 'no-cache')
+    url = urllib2.urlopen(req)
+    data = url.read()
+    if dest:
+        f = open(dest, 'w')
+    else:
+        f = sys.stdout
+    with f:
+        f.write(data)
+END
+}
+
+
+install_pip() {
+    if type -P pip > /dev/null; then
+        sh_net_httpfetch $PIP_URL > /tmp/get-pip.py
+        python /tmp/get-pip.py
+        rm /tmp/get-pip.py
+    fi
+}
+
 
 # Ubuntu / Debian
 do_apt() {
@@ -38,24 +75,30 @@ do_apt() {
     python -m pip install --upgrade thefuck
 }
 
+
 # FreeBSD (tipically)
 do_pkg() {
-    # install (requires root)
-    if ! type -P > /dev/null; then
+    # install sudo
+    if type -P sudo > /dev/null; then
         cd /usr/ports/security/sudo/ && make install clean
     fi
 
     # install base packages
     pkg install -y git vim screen gcc wget curl
-
-    # install pip
-    sh-py-install-pip python
-    python -m pip install --upgrade thefuck
 }
 
 
-if type -P apt > /dev/null; then
-    do_apt
-elif type -P pkg > /dev/null; then
-    do_pkg
-fi
+main() {
+    # install pip and fuck
+    install_pip
+    python -m pip install --upgrade thefuck
+
+    # install all the rest
+    if type -P apt > /dev/null; then
+        do_apt
+    elif type -P pkg > /dev/null; then
+        do_pkg
+    fi
+}
+
+main

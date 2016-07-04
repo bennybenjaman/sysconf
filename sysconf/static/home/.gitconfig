@@ -35,4 +35,4 @@
     helper = cache --timeout=3600000000000000000000
 
 [push]
-    default = simple
+	default = simple

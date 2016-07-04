@@ -131,11 +131,8 @@ def skip_if(condition=None, msg=None):
 def sh(cmd, sudo=False):
     """run cmd in a subprocess; exit on error."""
     if sudo:
-        if os.geteuid() != 0:
-            if which('sudo'):
-                cmd = 'sudo ' + cmd
-            else:
-                raise NotImplementedError
+        if os.geteuid() != 0 and which('sudo'):
+            cmd = 'sudo ' + cmd
     log("sh", cmd)
     ret = os.system(cmd)
     if ret != 0:

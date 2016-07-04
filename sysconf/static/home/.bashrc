@@ -719,6 +719,7 @@ END
 }
 
 
+# This is here as an utility fun for other bash scripts.
 # Replace str <src> with str <dst> in <file>.
 # This is here as an utility fun for other bash scripts.
 function _replace_in_file() {
@@ -765,19 +766,6 @@ function _sh_term_default() {
         #PS1='\[\033[01;30m\]\u\[\033[01;30m\]@\[\033[01;31m\]\h\[\033[00;34m\]:\[\033[01;35m\]\w\[\033[00;34m\]\[\033[01;30m\]$\[\033[00m\] '
     else
         PS1='\u@\[\033[01;31m\]\h\[\033[01;0m\]\w\$ '
-    fi
-}
-
-# no passwd for sudo
-function _set_sudo_no_passwd() {
-    if [ ! -f /etc/sudoers ]; then
-        # linux
-        append-to-file /etc/sudoers "$USER ALL=(ALL) NOPASSWD: ALL"
-    elif [ ! -f /usr/local/etc/sudoers ]; then
-        # bsd
-        append-to-file /usr/local/etc/sudoers "$USER ALL=(ALL) NOPASSWD: ALL"
-    else
-        echo "can't find the sudoers file; is sudo instaled?"
     fi
 }
 

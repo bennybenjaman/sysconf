@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
 
-
+set -x
 set -e
-
-# load utility functions
-source ~/.bashrc
-
 
 if [ "$(id -u)" != "0" ]; then
     echo "must be root"
@@ -15,15 +11,50 @@ fi
 set -x
 
 
+# Append str <pattern> at EOF of <file>. If <pattern> is already at
+# EOF do nothing.
+function append_line_to_file() {
+    file=$1 pattern=$2 python << END
+if 1:
+    import os, sys
+    try:
+        file = os.environ['file']
+        pattern = os.environ['pattern']
+    except (KeyError, AssertionError):
+        sys.exit('usage: append_line_to_file <fname> <pattern>')
+    with open(file, 'r') as f:
+        data = f.read()
+        data.rstrip()
+        last_line = data.splitlines()[-1]
+    if last_line != pattern:
+        with open(file, 'a') as f:
+            f.write(pattern.strip() + '\n')
+END
+}
+
+
+# no passwd for sudo
+function set_sudo_no_passwd() {
+    if [ -f /etc/sudoers ]; then
+        # linux
+        append_line_to_file /etc/sudoers "$USER ALL=(ALL) NOPASSWD: ALL"
+    elif [ -f /usr/local/etc/sudoers ]; then
+        # bsd
+        append_line_to_file /usr/local/etc/sudoers "$USER ALL=(ALL) NOPASSWD: ALL"
+    else
+        echo "can't find the sudoers file; is sudo instaled?" && exit 1
+    fi
+}
+
+
+
 # ===================================================================
 # Linux
 # ===================================================================
 
 if [[ $PLATFORM    == *"linux"* ]]; then
-    _set_sudo_no_passwd
-
     # disable error reports
-    _append_line_to_file /etc/default/apport "enabled=0"
+    append_line_to_file /etc/default/apport "enabled=0"
 
     # remove unwanted apps
     apt-get remove -y totem gedit
@@ -34,5 +65,10 @@ fi
 # All
 # ===================================================================
 
-# sshd config
-_append_line_to_file /etc/ssh/sshd_config "PermitRootLogin yes"
+# config sshd
+append_line_to_file /etc/ssh/sshd_config "PermitRootLogin yes"
+
+# config sudo
+if type -P sudo > /dev/null; then
+    set_sudo_no_passwd
+fi
