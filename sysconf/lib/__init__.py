@@ -13,11 +13,11 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 # =============================================================================
 
 
-ROOTDIR = os.path.normpath(os.path.join(HERE, '..', '..'))
-BINDIR = os.path.join(ROOTDIR, 'sysconf/bin')
-STATICDIR = os.path.join(ROOTDIR, 'sysconf/static')
-STATICHOMEDIR = os.path.join(ROOTDIR, 'sysconf/static/home')
-HOMEDIR = os.path.expanduser("~")
+DIR_ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
+DIR_BIN = os.path.join(DIR_ROOT, 'sysconf/bin')
+DIR_STATIC = os.path.join(DIR_ROOT, 'sysconf/static')
+DIR_STATIC_HOME = os.path.join(DIR_ROOT, 'sysconf/static/home')
+DIR_HOME = os.path.expanduser("~")
 
 
 # =============================================================================
