@@ -7,14 +7,16 @@ Recursively grep (or replaces) occurrences of <str> in all "dev" files
 in this directory.  Very similar to "ack" CLI util."
 
 Usage:
-    grep.py [-e <exts>] [-i] <pattern>  [<otherpatterns>...]
+    grep.py [-e <exts>] [-r] [<pattern> ...]
 
 Options:
     -e <exts> --exts=<exts>   # a list of extensions default=%s
+    -r --replace              # replace 2 patterns
 
 Examples:
-    grep.py -e py,c,h pattern          # extensions
-    grep.py foo bar                    # replaces 'foo' with 'bar'
+    grep.py -e py,c,h pattern    # extensions
+    grep.py foo bar              # search for 'foo' and 'bar' on the same line
+    grep.py -r foo bar           # replaces 'foo' with 'bar'
 """
 
 from __future__ import print_function
@@ -49,32 +51,65 @@ IGNORE_ROOT_DIRS = [
 __doc__ = __doc__ % str(tuple(DEFAULT_EXTS))
 
 
-def grep_file(filepath, pattern, replace=None):
-    def print_occurrences(data):
-        for lineno, line in enumerate(data.splitlines(), 1):
-            if pattern in line:
-                line = line.replace(pattern, hilite(pattern))
-                print("%s: %s" % (hilite(lineno, ok=None, bold=1), line))
-
+def grep_file(filepath, patterns, replace=False):
+    def print_occurrences(lines, patterns):
+        if not isinstance(lines, list):
+            # probably a file object
+            lines = iter(lines)
+        occurrences = 0
+        header_printed = False
+        for lineno, line in enumerate(lines, 1):
+            for pattern in patterns:
+                if pattern not in line:
+                    break
+            else:
+                if not header_printed:
+                    print(hilite(filepath, bold=1))
+                    header_printed = True
+                for pattern in patterns:
+                    line = line.replace(pattern, hilite(pattern))
+                print("%s: %s" % (
+                    hilite(lineno, ok=None, bold=1), line.strip()))
+                occurrences += 1
+        if occurrences:
+            print()
+        return occurrences
 
     def replace_in_file(data, src, dst):
         new_data = data.replace(src, dst)
         with open(filepath, 'w') as f:
             f.write(new_data)
 
-    with open(filepath, 'r') as f:
-        data = f.read()
+    def find_single_pattern(pattern):
+        assert isinstance(pattern, basestring)
+        with open(filepath, 'r') as f:
+            data = f.read()
+        occurrences = 0
+        if pattern in data:
+            lines = data.splitlines()
+            occurrences += print_occurrences(lines, patterns)
+        return occurrences
 
-    occurrences = 0
-    if pattern in data:
-        occurrences += data.count(pattern)
-        print(hilite(filepath, bold=1))
-        print_occurrences(data)
-        print()
+    def find_multi_patterns(patterns):
+        assert isinstance(patterns, list)
+        assert not replace
+        if replace and len(patterns) != 2:
+            sys.exit("with --replace you must specifcy 2 <pattern>s")
+        with open(filepath, 'r') as f:
+            return print_occurrences(f, patterns)
         if replace:
+            with open(filepath, 'r') as f:
+                data = f.read()
             replace_in_file(data, pattern, replace)
 
-    return occurrences
+
+        # if replace:
+        #     replace_in_file(data, pattern, replace)
+
+    if len(patterns) == 1:
+        return find_single_pattern(patterns[0])
+    else:
+        return find_multi_patterns(patterns)
 
 
 def main(argv=None):
@@ -90,8 +125,9 @@ def main(argv=None):
         if not ext.startswith('.'):
             exts[i] = '.' + ext
     exts = set(exts)
-    pattern = args['<str>']
-    replace = args['<replacement>']
+
+    patterns = args['<pattern>']
+    replace = False
 
     # run
     start_ext = exts == set(['.*'])
@@ -110,7 +146,7 @@ def main(argv=None):
                         continue   # skip
             filepath = os.path.join(root, name)
             ocs = grep_file(
-                filepath, pattern, replace=replace)
+                filepath, patterns, replace=replace)
             occurrences += ocs
             if ocs:
                 files_matching += 1
