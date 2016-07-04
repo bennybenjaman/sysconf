@@ -4,7 +4,10 @@ import os
 
 from sysconf import DIR_HOME
 from sysconf import DIR_STATIC_HOME
+from sysconf import LINUX
 from sysconf import safe_remove
+from sysconf import safe_makedirs
+from sysconf import safe_rmtree
 from sysconf import sh
 from sysconf import symlink
 from sysconf import which
@@ -19,8 +22,21 @@ def main():
             safe_remove(dst)
             symlink(src, dst)
 
+    # configure git
     if which('git'):
         sh("git config --global push.default simple")
+
+    if LINUX:
+        srcdir = os.path.join(
+            DIR_STATIC_HOME, '.config/sublime-text-3/Packages/User')
+        dstdir = os.path.join(
+            DIR_HOME, '.config/sublime-text-3/Packages/User')
+        # safe_rmtree(dstdir)
+        # safe_makedirs(os.path.dirname(dstdir))
+        sh("rm -rf %s" % os.path.dirname(dstdir))
+        safe_makedirs(os.path.dirname(dstdir))
+        os.listdir(srcdir)
+        symlink(srcdir, dstdir)
 
 
 main()

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 # TODO: may want to implement also the AND logic, not only OR
-# TODO: implement num of lines above and below
 
 """
 Recursively grep (or replaces) occurrences of <str> in all "dev" files
