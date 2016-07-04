@@ -56,20 +56,21 @@ IGNORE_ROOT_DIRS = [
 __doc__ = __doc__ % str(tuple(DEFAULT_EXTS))
 
 
-
 def get_terminal_size():
     try:
         from shutil import get_terminal_size as gts
     except ImportError:
         try:
-            import fcntl, termios, struct
+            import fcntl
+            import termios
+            import struct
             hw = struct.unpack('hh', fcntl.ioctl(
                 1, termios.TIOCGWINSZ, '1234'))
             return hw[1]
         except Exception as exc:
             return TERMINAL_SIZE_FALLBACK
     else:
-         gts(fallback(TERMINAL_SIZE_FALLBACK, 0))[0]
+        gts(fallback(TERMINAL_SIZE_FALLBACK, 0))[0]
 
 
 TERMINAL_SIZE = get_terminal_size()

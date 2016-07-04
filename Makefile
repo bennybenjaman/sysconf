@@ -54,3 +54,6 @@ userconfig:
 
 flake8:
 	@git ls-files | grep \\.py$ | xargs $(PYTHON) -m flake8
+
+autopep8:
+	@git ls-files | grep \\.py$ | xargs $(PYTHON) -m autopep8

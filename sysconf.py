@@ -61,7 +61,8 @@ def memoize(f):
     """Memoize function or method return values, saving time if
     method has already been called with that same argument.
     """
-    cache= {}
+    cache = {}
+
     def memf(*x):
         if x not in cache:
             cache[x] = f(*x)
@@ -116,7 +117,6 @@ def logtitle(s):
     print(hilite("\n>>> %s <<<\n" % s, bold=True))
 
 
-
 def skip_if(condition=None, msg=None):
     """Decorator to skip function execution."""
     def decorator(fun):
@@ -128,7 +128,6 @@ def skip_if(condition=None, msg=None):
                 return fun(*args, **kwargs)
         return wrapper
     return decorator
-
 
 
 # =============================================================================
@@ -278,7 +277,6 @@ def safe_makedirs(path, mode=None):
             raise
     else:
         log("mkdir -p", path)
-
 
 
 def safe_rmtree(path):

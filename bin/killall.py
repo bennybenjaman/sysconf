@@ -27,7 +27,6 @@ def logerr(s):
     print(hilite(s, ok=False))
 
 
-
 def find_procs(name):
     procs = []
     for p in psutil.process_iter():
@@ -93,4 +92,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
