@@ -133,7 +133,7 @@ def sh(cmd, sudo=False):
                 cmd = 'sudo ' + cmd
             else:
                 raise NotImplementedError
-    print(hilite("sh: %s" % cmd))
+    log("sh", cmd)
     ret = os.system(cmd)
     if ret != 0:
         raise SystemExit
@@ -194,6 +194,15 @@ def install_pkg(*names):
     if LINUX:
         names = ' '.join(names)
         sh("apt-get install -y %s" % names, sudo=True)
+    else:
+        raise NotImplementedError
+
+
+def uninstall_pkg(*names):
+    if LINUX:
+        names = ' '.join(names)
+        sh("apt-get purge -y %s" % names, sudo=True)
+        sh("apt-get autoremove -y", sudo=True)
     else:
         raise NotImplementedError
 
@@ -281,3 +290,9 @@ def touch(name):
     with open(name, 'w') as f:
         return f.name
     log("touch", name)
+
+
+def str_in_file(s, file):
+    with open(file, 'rb') as f:
+        data = f.read()
+    return s in data

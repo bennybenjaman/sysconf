@@ -9,6 +9,7 @@ from sysconf.lib import DIR_STATIC_HOME
 from sysconf.lib import safe_remove
 from sysconf.lib import sh
 from sysconf.lib import symlink
+from sysconf.lib import which
 
 
 def main():
@@ -19,4 +20,5 @@ def main():
             safe_remove(dst)
             symlink(src, dst)
 
-    sh("git config --global push.default simple")
+    if which('git'):
+        sh("git config --global push.default simple")

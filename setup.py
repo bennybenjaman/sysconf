@@ -3,7 +3,7 @@
 """
 Usage:
     make install                             # install all
-    setup.py confuser|confsys <subcmd>       # run specific subcmd
+    setup.py user|sys <subcmd>       # run specific subcmd
 """
 
 
@@ -31,8 +31,8 @@ def install_pkg():
         packages=[
             'sysconf',
             'sysconf.bin',
-            'sysconf.confsys',
-            'sysconf.confuser',
+            'sysconf.sys',
+            'sysconf.user',
             'sysconf.lib',
         ],
         install_packages=[
@@ -58,7 +58,7 @@ def run_script_by_path(path):
 
 
 def run_scripts_in_dir(path):
-    for name in os.listdir(path):
+    for name in sorted(os.listdir(path)):
         if not name.startswith('_') and name.endswith('.py'):
             run_script_by_path(os.path.join(path, name))
 
@@ -66,15 +66,15 @@ def run_scripts_in_dir(path):
 def main():
     if sys.argv == ['setup.py', 'develop', '--user']:
         install_pkg()
-        run_scripts_in_dir('sysconf/confuser')
-        run_scripts_in_dir('sysconf/confsys')
+        run_scripts_in_dir('sysconf/user')
+        run_scripts_in_dir('sysconf/sys')
     else:
         # CLI parser
         from sysconf.lib import hilite
 
         def get_avail_subcmds(subcmd):
             ls = []
-            for name in os.listdir('sysconf/' + subcmd):
+            for name in sorted(os.listdir('sysconf/' + subcmd)):
                 if not name.startswith('_') and name.endswith('.py'):
                     ls.append(name)
             return ls
@@ -84,7 +84,7 @@ def main():
             return sys.exit(__doc__.strip())
 
         subcmd = sys.argv[1]
-        if subcmd not in ('confuser', 'confsys'):
+        if subcmd not in ('user', 'sys'):
             sys.exit(__doc__.strip())
 
         # list sub cmds
