@@ -44,9 +44,9 @@ esac
 #force_color_prompt=yes
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-    color_prompt=yes
+        color_prompt=yes
     else
-    color_prompt=
+        color_prompt=
     fi
 fi
 
@@ -59,11 +59,11 @@ unset color_prompt force_color_prompt
 
 # if this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
+    xterm*|rxvt*)
+        PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+        ;;
+    *)
+        ;;
 esac
 
 if [ -f ~/.bash_aliases ]; then
@@ -171,7 +171,7 @@ else
     alias ls='ls -hF'
 fi
 alias l='ls'
-alias ll='ls -l'
+alias ll='ls -la'
 alias ls-ext='ls -lXB'        # sort by extension
 alias ls-biggest='BLOCKSIZE=1048576; du -x | sort -nr | head -20 | grep -v \.hg | grep -v \.git '
 alias ls-size='ls -lSr'        # sort by size
@@ -222,11 +222,11 @@ else
 fi
 
 # grep (and variants)
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
-if [[ $OSTYPE == *linux* ]]; then
+if [[ $PLATFORM == *linux* ]]; then
     alias grep='grep --color=auto --exclude=*.pyc --exclude=*.orig --exclude=*.rej --exclude-dir=.svn --exclude-dir=.egg-info --exclude-dir=.hg --exclude-dir=.git'
 fi
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
 
 # df
 alias df='df -h'
@@ -445,14 +445,6 @@ if 1:
             pip_install("nose", pyver)
             pip_install("pyflakes", pyver)
             pip_install("flake8", pyver)  # also installs pep8
-
-    # autocompletion
-    if not os.path.exists(os.path.expanduser("~/.pythonstart")):
-        section("getting ~/.pythonstart")
-        wget("http://code.activestate.com/recipes/578098/download/1/",
-             "~/.pythonstart")
-    if not "PYTHONSTARTUP" in os.environ:
-        section("ERR: PYTHONSTARTUP is not set")
 END
 }
 
@@ -530,7 +522,7 @@ function sh-net-myip() {
 
 
 # add your public SSH key to a remote host
-function sh-net-upload-sshkeys() {
+function sh-net-scp-ssh-keys() {
     if [ -z "$1" ] || [ -z "$2" ]; then
         echo "usage: ssh-add-remote-keys <user> <remote-ip> "
         return
@@ -701,53 +693,6 @@ function sh-path-size() {
 }
 
 
-# Append str <pattern> at EOF of <file>. If <pattern> is already at
-# EOF do nothing.
-# This is here as an utility fun for other bash scripts.
-function _append_line_to_file() {
-    file=$1 pattern=$2 python << END
-if 1:
-    import os, sys
-    try:
-        file = os.environ['file']
-        pattern = os.environ['pattern']
-    except (KeyError, AssertionError):
-        sys.exit('usage: _append_line_to_file <fname> <pattern>')
-    with open(file, 'r') as f:
-        data = f.read()
-        data.rstrip()
-        last_line = data.splitlines()[-1]
-    if last_line != pattern:
-        with open(file, 'a') as f:
-            f.write(pattern.strip() + '\n')
-END
-}
-
-
-# This is here as an utility fun for other bash scripts.
-# Replace str <src> with str <dst> in <file>.
-# This is here as an utility fun for other bash scripts.
-function _replace_in_file() {
-    file=$1 src=$2 dst=$3 python << END
-if 1:
-    import os, sys
-    try:
-        file = os.environ['file']
-        src = os.environ['src']
-        dst = os.environ['dst']
-    except (KeyError, AssertionError):
-        sys.exit('usage: _replace_in_file <fname> <src> <dst>')
-    with open(file, 'r') as f:
-        data = f.read()
-    new_data = data.replace(src, dst)
-    if data != new_data:
-        with open(file, 'w') as f:
-            f.write(new_data)
-END
-}
-
-
-
 # ===========================================================================
 # Internal utils
 # ===========================================================================
@@ -773,11 +718,6 @@ function _sh_term_default() {
         PS1='\u@\[\033[01;31m\]\h\[\033[01;0m\]\w\$ '
     fi
 }
-
-
-# =============================================================================
-# end of custom functions
-# =============================================================================
 
 _brown='\e[0;33m'
 _nc='\e[0m'
@@ -813,8 +753,15 @@ function _print_sysinfo() {
     echo -en "${_nc}"
 }
 
+
+# =============================================================================
+# Final stuff
+# =============================================================================
+
+# print a banner to figure out what machine I'm on
 _print_sysinfo
 
+# set the right terminal in case I'm in a GIT dir
 if [ -d .git ]; then
     _sh_term_git
 else

@@ -13,7 +13,7 @@ set -x
 
 # Append str <pattern> at EOF of <file>. If <pattern> is already at
 # EOF do nothing.
-function append_line_to_file() {
+append_line_to_file() {
     file=$1 pattern=$2 python << END
 if 1:
     import os, sys
@@ -33,8 +33,33 @@ END
 }
 
 
+# This is here as an utility fun for other bash scripts.
+# Replace str <src> with str <dst> in <file>.
+# This is here as an utility fun for other bash scripts.
+
+replace_in_file() {
+    file=$1 src=$2 dst=$3 python << END
+if 1:
+    import os, sys
+    try:
+        file = os.environ['file']
+        src = os.environ['src']
+        dst = os.environ['dst']
+    except (KeyError, AssertionError):
+        sys.exit('usage: _replace_in_file <fname> <src> <dst>')
+    with open(file, 'r') as f:
+        data = f.read()
+    new_data = data.replace(src, dst)
+    if data != new_data:
+        with open(file, 'w') as f:
+            f.write(new_data)
+END
+}
+
+
+
 # no passwd for sudo
-function set_sudo_no_passwd() {
+set_sudo_no_passwd() {
     if [ -f /etc/sudoers ]; then
         # linux
         append_line_to_file /etc/sudoers "$USER ALL=(ALL) NOPASSWD: ALL"
