@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# load utility functions
+source /home/giampaolo/.bashrc
+
+set -x
+set -e
+
+function sudo_no_passwd() {
+    # no passwd for sudo
+    append-to-file /etc/sudoers "$USER ALL=(ALL) NOPASSWD: ALL"
+}
+
+
+if [[ $PLATFORM    == *"linux"* ]]; then
+    sudo_no_passwd
+
+    # disable error reports
+    append-to-file /etc/default/apport "enabled=0"
+
+    # remove unwanted apps
+    sudo apt-get remove -y totem gedit
+fi
+

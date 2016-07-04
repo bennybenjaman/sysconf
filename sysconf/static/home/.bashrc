@@ -5,6 +5,7 @@
 # ===========================================================================
 
 SYSCONF_BIN_DIR="$(python -c 'import sysconf.lib; print(sysconf.lib.DIR_BIN)')"
+PLATFORM="$(python -c "import sys; print(sys.platform)")"
 _LAPTOP="N501VW" # laptop id
 _HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
 
@@ -679,6 +680,7 @@ function sh-path-arch-extract() {
     fi
 }
 
+
 # print size path
 function sh-path-size() {
     if [ -z "$1" ]; then
@@ -686,6 +688,40 @@ function sh-path-size() {
         return
     fi
     du -hs $1
+}
+
+
+# Append <str> to <file>. If <str> is already in <file> do nothing.
+# This is here as an utility fun for other bash scripts.
+function append-to-file() {
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo "usage: append-to-file <file> <str>"
+        exit 1
+    fi
+    if [ ! -f $1 ]; then
+        # raise 'cause we're appending as root; don't want to create
+        # a file owned by root.
+        echo "file $1 not found!"
+        exit 1
+    fi
+    sudo grep -q -F "$2" "$1" || echo "$2" | sudo tee -a "$1"
+}
+
+
+# Replace <src> with <dst> in <file>.
+# This is here as an utility fun for other bash scripts.
+function replace-in-file() {
+    if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+        echo "usage: replace-in-file <file> <src> <dst>"
+        exit 1
+    fi
+    if [ ! -f $1 ]; then
+        # raise just in case if the file does not exist sed will
+        # create it as root
+        echo "file $1 not found!"
+        exit 1
+    fi
+    sudo sed -i 's/$2/$3/g' $1
 }
 
 

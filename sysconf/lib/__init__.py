@@ -2,11 +2,14 @@ import errno
 import functools
 import os
 import shutil
+import subprocess
 import sys
+import tempfile
 
 
 PYTHON = sys.executable
 HERE = os.path.abspath(os.path.dirname(__file__))
+PY3 = sys.version_info[0] == 3
 
 
 # =============================================================================
@@ -137,6 +140,18 @@ def sh(cmd, sudo=False):
     ret = os.system(cmd)
     if ret != 0:
         raise SystemExit
+
+
+def pyrun(src):
+    """Run python code 'src' in a separate interpreter.
+    Return interpreter subprocess.
+    """
+    if PY3:
+        src = bytes(src, 'ascii')
+    with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as f:
+        f.write(src)
+        f.flush()
+        return subprocess.check_output(["sudo", PYTHON, f.name])
 
 
 try:

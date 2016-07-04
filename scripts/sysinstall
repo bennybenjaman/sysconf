@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# load utility functions
+source /home/giampaolo/.bashrc
+
+set -x
+set -e
+
+
+do_linux() {
+    # add chrome ppa http://www.ubuntuupdates.org/ppa/google_chrome
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+    sudo rm /etc/apt/sources.list.d/google.list
+    sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+
+    # add skype ppa http://www.ubuntugeek.com/how-to-install-skype-in-ubuntu-12-04precise.html
+    sudo apt-add-repository "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
+
+    sudo add-apt-repository "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
+
+    # install all essential packages
+    base="msttcorefonts vim build-essential ubuntu-restricted-extras rar unrar sudo"
+    net="curl wget"
+    dev="mercurial git colordiff libreadline-dev libncurses*-dev python-dev python3-dev build-essential ack-grep libffi-dev libssl-dev"
+    media="vlc ffmpeg"
+    sys="screen htop virtualbox xawtv indicator-cpufreq"
+    ppa="google-chrome-stable skype"
+    sudo apt-get update
+    sudo apt-get install -y $base $net $dev $media $sys $ppa
+    sudo apt-get install -y linux-headers-`uname -r`
+}
+
+
+if [[ $PLATFORM == *"linux"* ]]; then
+    do_linux
+fi
