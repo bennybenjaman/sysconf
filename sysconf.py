@@ -1,3 +1,11 @@
+"""
+Support library which provides utiliy functions in case I'll
+ever want to do logic in python instead of bash, or in case
+I want bash to use Python.
+
+Import it as "from sysconf import something"
+"""
+
 import errno
 import functools
 import os

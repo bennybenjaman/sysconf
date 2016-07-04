@@ -39,3 +39,15 @@ install:
 	$(PYTHON) -m pip install --user --upgrade setuptools
 	# Finally install this pkg.
 	$(PYTHON) setup.py develop --user
+
+runall:
+	$(PYTHON) setup.py runall
+
+sysinstall:
+	$(PYTHON) setup.py sysinstall
+
+sysconfig:
+	$(PYTHON) setup.py sysconfig
+
+userconfig:
+	$(PYTHON) setup.py userconfig

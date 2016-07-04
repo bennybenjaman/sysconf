@@ -7,6 +7,7 @@ Usage:
     setup sysinstall
     setup sysconfig
     setup userconfig
+    setup runall
 """
 
 
@@ -67,7 +68,6 @@ def run_all():
 def main():
     if sys.argv == ['setup.py', 'develop', '--user']:
         install_pkg()
-        run_all()
     else:
         from docopt import docopt
         args = docopt(__doc__)
@@ -77,6 +77,8 @@ def main():
             run_sysconfig()
         elif args['userconfig']:
             run_userconfig()
+        elif args['runall']:
+            run_all()
 
 
 if __name__ == '__main__':

@@ -2,12 +2,12 @@
 
 import os
 
-from sysconf.lib import DIR_HOME
-from sysconf.lib import DIR_STATIC_HOME
-from sysconf.lib import safe_remove
-from sysconf.lib import sh
-from sysconf.lib import symlink
-from sysconf.lib import which
+from sysconf import DIR_HOME
+from sysconf import DIR_STATIC_HOME
+from sysconf import safe_remove
+from sysconf import sh
+from sysconf import symlink
+from sysconf import which
 
 
 def main():
