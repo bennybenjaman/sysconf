@@ -7,15 +7,14 @@ Recursively grep (or replaces) occurrences of <str> in all "dev" files
 in this directory.  Very similar to "ack" CLI util."
 
 Usage:
-    grep.py [-e <exts>] <str> [<replacement>]
+    grep.py [-e <exts>] [-i] <pattern>  [<otherpatterns>...]
 
 Options:
-    -r <str> --replace=<str>  # replace string
     -e <exts> --exts=<exts>   # a list of extensions default=%s
 
 Examples:
     grep.py -e py,c,h pattern          # extensions
-    grep.py -r bar foo                 # replaces 'foo' with 'bar'
+    grep.py foo bar                    # replaces 'foo' with 'bar'
 """
 
 from __future__ import print_function
