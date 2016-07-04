@@ -92,19 +92,17 @@ def grep_file(filepath, patterns, replace=False):
 
     def find_multi_patterns(patterns):
         assert isinstance(patterns, list)
-        assert not replace
         if replace and len(patterns) != 2:
             sys.exit("with --replace you must specifcy 2 <pattern>s")
+        if patterns[0] == patterns[1]:
+            sys.exit("<pattern>s can't be equal")
         with open(filepath, 'r') as f:
-            return print_occurrences(f, patterns)
+            occurrences = print_occurrences(f, set(patterns))
         if replace:
             with open(filepath, 'r') as f:
                 data = f.read()
             replace_in_file(data, pattern, replace)
-
-
-        # if replace:
-        #     replace_in_file(data, pattern, replace)
+        return occurrences
 
     if len(patterns) == 1:
         return find_single_pattern(patterns[0])
@@ -126,8 +124,9 @@ def main(argv=None):
             exts[i] = '.' + ext
     exts = set(exts)
 
-    patterns = args['<pattern>']
-    replace = False
+    patterns = list(set(args['<pattern>']))
+    replace = args['--replace']
+    print(args)
 
     # run
     start_ext = exts == set(['.*'])
