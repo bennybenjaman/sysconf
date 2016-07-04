@@ -20,7 +20,16 @@ def install_pkg():
         platforms='Platform Independent',
         author="Giampaolo Rodola'",
         author_email='g.rodola@gmail.com',
-        packages=['sysconf', 'sysconf.lib'],
+        packages=[
+            'sysconf',
+            'sysconf.bin',
+            'sysconf.confsys',
+            'sysconf.confuser',
+            'sysconf.lib',
+        ],
+        install_packages=[
+            'docopt',
+        ]
     )
 
 
