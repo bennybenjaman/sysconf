@@ -56,4 +56,5 @@ flake8:
 	@git ls-files | grep \\.py$ | xargs $(PYTHON) -m flake8
 
 autopep8:
-	@git ls-files | grep \\.py$ | xargs $(PYTHON) -m autopep8
+	git ls-files | grep \\.py$ | xargs $(PYTHON) -m autopep8 --aggressive --in-place --experimental
+	$(PYTHON) -m autopep8 --aggressive --in-place scripts/userconfig --experimental

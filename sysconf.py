@@ -256,7 +256,7 @@ def safe_remove(path):
     "Same as os.remove() but doesn't raise exception on missing file"
     try:
         os.remove(path)
-    except OSError, err:
+    except OSError as err:
         if err.errno != errno.ENOENT:
             raise
     else:
@@ -267,7 +267,7 @@ def safe_makedirs(path, mode=None):
     "Same as os.makedirs() but doesn't raise exception if dir already exists"
     try:
         os.makedirs(path, **dict(mode=mode) if mode is not None else {})
-    except OSError, err:
+    except OSError as err:
         if err.errno == errno.EEXIST:
             if not os.path.isdir(path):
                 raise
