@@ -129,7 +129,7 @@ export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[04;38;5;146m'
 
 # pip bash completion start
-function _pip_completion() {
+_pip_completion() {
     COMPREPLY=( $( COMP_WORDS="${COMP_WORDS[*]}" \
                    COMP_CWORD=$COMP_CWORD \
                    PIP_AUTO_COMPLETE=1 $1 ) )
@@ -182,7 +182,7 @@ alias ls-dirs='ls -l | grep "^d"'   #list only directories
 alias ls-files='ls -l | grep -v "^d"'   #list only file
 
 # cd - automatically do an ls after each cd
-function cd() {
+cd() {
     if [ -n "$1" ]; then
         builtin cd "$@" && ls
     else
@@ -242,7 +242,7 @@ alias wget='wget -N --no-check-certificate'
 alias ssh='ssh -o StrictHostKeyChecking=no'
 
 # substitute for 'realpath' cmd, which is not always available
-function realpath() {
+realpath() {
     if [ -z "$1" ] ; then
         echo "usage: realpath <path>"
         return
@@ -261,7 +261,7 @@ function realpath() {
 # =============================================================================
 
 # try to find a virtualenv and activate it
-function sh-py-source-venv() {
+sh-py-source-venv() {
     if [ -f venv/bin/activate ]; then
         source venv/bin/activate
     elif [ -f .venv/bin/activate ]; then
@@ -276,7 +276,7 @@ function sh-py-source-venv() {
 }
 
 # clean unnecessary files
-function sh-py-clean-build-files() {
+sh-py-clean-build-files() {
     $(which rm) -f `find . -type f -name \*.py[co]`
     $(which rm) -f `find . -type f -name \*.so`
     $(which rm) -f `find . -type f -name .\*~`
@@ -292,7 +292,7 @@ function sh-py-clean-build-files() {
 }
 
 # install python for the given python version
-function sh-py-install-pip() {
+sh-py-install-pip() {
     if [ -z "$1" ] ; then
         echo "usage: py-install-pip <python>"
         return
@@ -319,7 +319,7 @@ function sh-py-install-pip() {
 }
 
 # print all python module imports
-function sh-py-find-imports() {
+sh-py-find-imports() {
     python << END
 if 1:
     import os, fnmatch, re
@@ -353,7 +353,7 @@ END
 }
 
 # install pip and ipdb for all installed python versions
-function sh-py-setup-all() {
+sh-py-setup-all() {
     python << END
 if 1:
     import subprocess, os, urllib2
@@ -450,7 +450,7 @@ END
 
 
 # upgrades all python libs
-function sh-py-pip-upgrade-all() {
+sh-py-pip-upgrade-all() {
     pip freeze --local | grep -v '^\-e' | cut -d = -f 1  | xargs pip install -U --user
 }
 
@@ -464,7 +464,7 @@ alias sh-net-ping-google='ping google.com'
 
 # ...in case wget/curl are missing
 # usage: sh-net-httpfetch <url> [<file>]
-function sh-net-httpfetch() {
+sh-net-httpfetch() {
     url=$1 dest=$2 python << END
 from __future__ import print_function
 if 1:
@@ -492,7 +492,7 @@ END
 }
 
 # paste file on a pastebin-like service and return the generated url
-function sh-net-pastebin() {
+sh-net-pastebin() {
     file=$1 python << END
 if 1:
     import urllib, urllib2, os, sys
@@ -516,13 +516,13 @@ END
 
 
 # show public ip
-function sh-net-myip() {
+sh-net-myip() {
     sh-net-httpfetch icanhazip.com
 }
 
 
 # add your public SSH key to a remote host
-function sh-net-scp-ssh-keys() {
+sh-net-scp-ssh-keys() {
     if [ -z "$1" ] || [ -z "$2" ]; then
         echo "usage: ssh-add-remote-keys <user> <remote-ip> "
         return
@@ -538,7 +538,7 @@ function sh-net-scp-ssh-keys() {
 # =============================================================================
 
 # install package
-function sh-pkg-install() {
+sh-pkg-install() {
     if [ -z "$1" ]; then
         echo "usage: sh-pkg-install <pkg-name> "
         return
@@ -562,7 +562,7 @@ function sh-pkg-install() {
 }
 
 # remove package
-function sh-pkg-uninstall() {
+sh-pkg-uninstall() {
     if [ -z "$1" ]; then
         echo "usage: sh-pkg-uninstall <pkg-name> "
         return
@@ -587,7 +587,7 @@ function sh-pkg-uninstall() {
 }
 
 # search package
-function sh-pkg-search() {
+sh-pkg-search() {
     if [ -z "$1" ]; then
         echo "usage: sh-pkg-search <pkg-name> "
         return
@@ -612,7 +612,7 @@ function sh-pkg-search() {
 
 
 # search package
-function sh-pkg-list-installed() {
+sh-pkg-list-installed() {
     # ubuntu / debian
     if type -P dpkg > /dev/null; then
         sudo dpkg -l
@@ -633,7 +633,7 @@ function sh-pkg-list-installed() {
 
 # shows apt history
 if type -P dpkg > /dev/null; then
-    function sh-pkg-history() {
+    sh-pkg-history() {
         case "$1" in
             install)
                 cat /var/log/dpkg.log | grep 'install '
@@ -660,7 +660,7 @@ fi
 # =============================================================================
 
 # extract all archives just by typing 'extract arch.ext'
-function sh-path-arch-extract() {
+sh-path-arch-extract() {
     if [ -f $1 ] ; then
         case $1 in
             *.tar.bz2)   tar xvjf $1;;
@@ -684,7 +684,7 @@ function sh-path-arch-extract() {
 
 
 # print size path
-function sh-path-size() {
+sh-path-size() {
     if [ -z "$1" ]; then
         echo "usage: sh-path-size <path> "
         return
@@ -697,7 +697,7 @@ function sh-path-size() {
 # Internal utils
 # ===========================================================================
 
-function _sh_term_git() {
+_sh_term_git() {
     if [[ $OSTYPE == *linux-gnu* ]]; then
         if [ "$PS1" ]; then
             if [ "$BASH" ]; then
@@ -709,7 +709,7 @@ function _sh_term_git() {
     _sh_term_default
 }
 
-function _sh_term_default() {
+_sh_term_default() {
     if [ `hostname` = $LAPTOP ]; then
         :
         PS1='\[\033[01;0m\]\w\$ '
@@ -738,7 +738,7 @@ _nc='\e[0m'
 # _white='\e[1;37m'
 
 # Print system info when a new shell is opened
-function _print_sysinfo() {
+_print_sysinfo() {
     echo -en "${_brown}"
     echo -e "${_brown}Hostname: `hostname`"
     echo -e "Date:     `date +"%Y-%m-%d %H:%M:%S"`"
