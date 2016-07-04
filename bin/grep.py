@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 # TODO: case-insnsitive
-# TODO: file-ext = * should grep all files
 
 """
 Recursively grep (or replaces) occurrences of <str> in all "dev" files
@@ -87,7 +86,7 @@ def main(argv=None):
     else:
         exts = DEFAULT_EXTS
     for i, ext in enumerate(exts):
-        if not ext.isalnum():
+        if not ext.isalnum() and ext != '*':
             sys.exit("invalid extension %s" % ext)
         if not ext.startswith('.'):
             exts[i] = '.' + ext
@@ -96,19 +95,20 @@ def main(argv=None):
     replace = args['--replace']
 
     # run
+    start_ext = exts == set(['.*'])
     files_matching = 0
     occurrences = 0
     for root, dirs, files in os.walk('.', topdown=False):
-        # skip
         parent_root = os.path.normpath(root).split('/')[0]
         if parent_root in IGNORE_ROOT_DIRS:
-            continue
+            continue  # skip
         if parent_root.endswith('.egg-info'):
-            continue
+            continue  # skip
         for name in files:
             if os.path.splitext(name)[1] not in exts:
                 if name not in SPECIAL_NAMES:
-                    continue
+                    if not start_ext:
+                        continue   # skip
             filepath = os.path.join(root, name)
             ocs = grep_file(
                 filepath, pattern, replace=replace)
