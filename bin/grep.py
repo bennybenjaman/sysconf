@@ -31,10 +31,17 @@ from sysconf import hilite
 DEFAULT_EXTS = [
     'c',
     'h',
+    'in',
+    'ini',
     'md',
     'py',
     'rst',
     'txt',
+    'yaml',
+    'yml',
+]
+SPECIAL_NAMES = [
+    'README',
 ]
 IGNORE_ROOT_DIRS = [
     '.git',
@@ -98,7 +105,8 @@ def main(argv=None):
             continue
         for name in files:
             if os.path.splitext(name)[1] not in exts:
-                continue
+                if name not in SPECIAL_NAMES:
+                    continue
             filepath = os.path.join(root, name)
             ocs = grep_file(
                 filepath, pattern, replace=replace)
