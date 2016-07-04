@@ -109,7 +109,11 @@ def logtitle(s):
 def sh(cmd, sudo=False):
     """run cmd in a subprocess; exit on error."""
     if sudo:
-        raise NotImplementedError
+        if os.geteuid() != 0:
+            if which('sudo'):
+                cmd = 'sudo ' + cmd
+            else:
+                raise NotImplementedError
     print(hilite("sh: %s" % cmd))
     ret = os.system(cmd)
     if ret != 0:
@@ -165,6 +169,14 @@ except ImportError:
                     if _access_check(name, mode):
                         return name
         return None
+
+
+def install_pkg(*names):
+    if LINUX:
+        names = ' '.join(names)
+        sh("apt-get install -y %s" % names, sudo=True)
+    else:
+        raise NotImplementedError
 
 
 # =============================================================================

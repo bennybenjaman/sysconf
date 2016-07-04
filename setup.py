@@ -42,9 +42,18 @@ def confuser():
             mod.main()
 
 
+def confsys():
+    for name in os.listdir('sysconf/confsys'):
+        if not name.startswith('_') and name.endswith('.py'):
+            modname = 'sysconf.confsys.' + os.path.splitext(name)[0]
+            mod = importlib.import_module(modname)
+            mod.main()
+
+
 def main():
     install_pkg()
     confuser()
+    confsys()
 
 
 
