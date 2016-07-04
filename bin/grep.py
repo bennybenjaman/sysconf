@@ -7,7 +7,7 @@ Recursively grep (or replaces) occurrences of <str> in all "dev" files
 in this directory.  Very similar to "ack" CLI util."
 
 Usage:
-    grep.py [-r <str>] [-e <exts>] [-i] [-v] <str>
+    grep.py [-e <exts>] <str> [<replacement>]
 
 Options:
     -r <str> --replace=<str>  # replace string
@@ -92,7 +92,7 @@ def main(argv=None):
             exts[i] = '.' + ext
     exts = set(exts)
     pattern = args['<str>']
-    replace = args['--replace']
+    replace = args['<replacement>']
 
     # run
     start_ext = exts == set(['.*'])
