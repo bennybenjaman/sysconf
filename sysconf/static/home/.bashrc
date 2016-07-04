@@ -81,7 +81,7 @@ fi
 
 
 # ===========================================================================
-# Set / Export / Config
+# Set / export / config
 # ===========================================================================
 
 # Webcam brightness (notebook only)
@@ -134,6 +134,33 @@ export LESS_TERMCAP_so=$'\E[38;5;246m'
 export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[04;38;5;146m'
 
+# pip bash completion start
+function _pip_completion() {
+    COMPREPLY=( $( COMP_WORDS="${COMP_WORDS[*]}" \
+                   COMP_CWORD=$COMP_CWORD \
+                   PIP_AUTO_COMPLETE=1 $1 ) )
+}
+complete -o default -F _pip_completion pip
+
+# bash completion
+if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+fi
+
+# SSH completion (TODO: test this)
+if [ -f ~/.ssh/known_hosts ]; then
+    SSH_COMPLETE=( $(cat ~/.ssh/known_hosts | \
+    cut -f 1 -d ' ' | \
+    sed -e s/,.*//g | \
+    uniq | \
+    egrep -v [0123456789]) )
+    complete -o default -W "${SSH_COMPLETE[*]}" ssh
+fi
+
+# completion for sudo
+complete -cf sudo
+
+
 # ===========================================================================
 # Aliases
 # ===========================================================================
@@ -169,9 +196,9 @@ function cd() {
     fi
 
     if [ -d .git ]; then
-        sh-term-git
+        _sh_term_git
     else
-        sh-term-default
+        _sh_term_default
     fi
 }
 
@@ -473,7 +500,9 @@ if 1:
     req = urllib2.Request('http://codepad.org/', data)
     f = urllib2.urlopen(req)
     assert f.getcode() == 200, f.getcode()
-    print f.geturl()
+    url = f.geturl()
+    if 'DISPLAY' in os.environ:
+        os.system('google-chrome %s' % url)
 END
 }
 
@@ -519,7 +548,7 @@ function sh-pkg-install() {
     elif type -P pkg_add > /dev/null; then
         pkg_add -r $1
     else
-        echo "system not supported"
+        eho "system not supported"
     fi
 }
 
@@ -574,7 +603,7 @@ fi
 # =============================================================================
 
 # extract all archives just by typing 'extract arch.ext'
-function sh-arch-extract() {
+function sh-path-arch-extract() {
     if [ -f $1 ] ; then
         case $1 in
             *.tar.bz2)   tar xvjf $1;;
@@ -596,12 +625,21 @@ function sh-arch-extract() {
     fi
 }
 
+# print size path
+function sh-path-size() {
+    if [ -z "$1" ]; then
+        echo "usage: sh-path-size <path> "
+        return
+    fi
+    du -hs $1
+}
+
 
 # ===========================================================================
 # Terminal
 # ===========================================================================
 
-function sh-term-git() {
+function _sh_term_git() {
     if [[ $OSTYPE == *linux-gnu* ]]; then
         if [ "$PS1" ]; then
             if [ "$BASH" ]; then
@@ -610,10 +648,10 @@ function sh-term-git() {
             fi
         fi
     fi
-    sh-term-default
+    _sh_term_default
 }
 
-function sh-term-default() {
+function _sh_term_default() {
     if [ `hostname` = $_LAPTOP ]; then
         :
         PS1='\[\033[01;0m\]\w\$ '
@@ -626,32 +664,6 @@ function sh-term-default() {
 # =============================================================================
 # end of custom functions
 # =============================================================================
-
-# pip bash completion start
-function _pip_completion() {
-    COMPREPLY=( $( COMP_WORDS="${COMP_WORDS[*]}" \
-                   COMP_CWORD=$COMP_CWORD \
-                   PIP_AUTO_COMPLETE=1 $1 ) )
-}
-complete -o default -F _pip_completion pip
-
-# bash completion
-if [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-fi
-
-# SSH completion (TODO: test this)
-if [ -f ~/.ssh/known_hosts ]; then
-    SSH_COMPLETE=( $(cat ~/.ssh/known_hosts | \
-    cut -f 1 -d ' ' | \
-    sed -e s/,.*//g | \
-    uniq | \
-    egrep -v [0123456789]) )
-    complete -o default -W "${SSH_COMPLETE[*]}" ssh
-fi
-
-# completion for sudo
-complete -cf sudo
 
 _brown='\e[0;33m'
 _nc='\e[0m'
@@ -690,7 +702,7 @@ function _print_sysinfo() {
 _print_sysinfo
 
 if [ -d .git ]; then
-    sh-term-git
+    _sh_term_git
 else
-    sh-term-default
+    _sh_term_default
 fi
