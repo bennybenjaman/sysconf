@@ -51,3 +51,6 @@ sysconfig:
 
 userconfig:
 	$(PYTHON) setup.py userconfig
+
+flake8:
+	@git ls-files | grep \\.py$ | xargs $(PYTHON) -m flake8

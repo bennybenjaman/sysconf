@@ -19,7 +19,11 @@
 		"*.diff",
 		"*sublime*",
 		"*.hg*",
-		"*.bak"
+		"*.bak",
+		"*.git",
+		"*.hg",
+		"*.diff",
+		"*.patch",
 	],
 	"find_selected_text": true,
 	"folder_exclude_patterns":

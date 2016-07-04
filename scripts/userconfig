@@ -7,7 +7,6 @@ from sysconf import DIR_STATIC_HOME
 from sysconf import LINUX
 from sysconf import safe_remove
 from sysconf import safe_makedirs
-from sysconf import safe_rmtree
 from sysconf import sh
 from sysconf import symlink
 from sysconf import which
