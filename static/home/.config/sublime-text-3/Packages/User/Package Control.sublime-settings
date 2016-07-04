@@ -1,4 +1,8 @@
 {
+	"bootstrapped": true,
+	"in_process_packages":
+	[
+	],
 	"installed_packages":
 	[
 		"Anaconda",
@@ -6,6 +10,7 @@
 		"JsFormat",
 		"Modific",
 		"MoveTab",
+		"Package Control",
 		"RestructuredText Improved",
 		"SideBarEnhancements",
 		"SublimeREPL",

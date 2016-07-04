@@ -2,6 +2,7 @@
 	"bold_folder_labels": true,
 	"caret_style": "phase",
 	"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+	"ensure_newline_at_eof_on_save": true,
 	"file_exclude_patterns":
 	[
 		"*.pyc",
@@ -35,13 +36,13 @@
 		"subpixel_antialias",
 		"no_bold"
 	],
-	"font_size": 11,
+	"font_size": 12,
 	"highlight_line": false,
 	"highlight_modified_tabs": true,
 	"ignored_packages":
 	[
-		"Vintage",
-		"RestructuredText"
+		"RestructuredText",
+		"Vintage"
 	],
 	"line_padding_bottom": 0,
 	"line_padding_top": 0,
@@ -54,6 +55,5 @@
 	"tab_completion": true,
 	"translate_tabs_to_spaces": true,
 	"trim_trailing_white_space_on_save": true,
-	"word_wrap": true,
-	"ensure_newline_at_eof_on_save": true
+	"word_wrap": true
 }
