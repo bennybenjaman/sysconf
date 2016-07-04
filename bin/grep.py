@@ -75,11 +75,6 @@ def grep_file(filepath, patterns, replace=False):
             print()
         return occurrences
 
-    def replace_in_file(data, src, dst):
-        new_data = data.replace(src, dst)
-        with open(filepath, 'w') as f:
-            f.write(new_data)
-
     def find_single_pattern(pattern):
         assert isinstance(pattern, basestring)
         with open(filepath, 'r') as f:
@@ -105,8 +100,24 @@ def grep_file(filepath, patterns, replace=False):
             replace_in_file(data, src, dst)
         return occurrences
 
+    def replace_patterns(patterns):
+        with open(filepath, 'r') as f:
+            data = f.read()
+        src, dst = patterns
+        new_data = data.replace(src, dst)
+        occurrences = 0
+        if data != new_data:
+            occurrences = data.count(src)
+            print("%s (%s occurrences)" % (
+                hilite(filepath, bold=1), hilite(occurrences)))
+            with open(filepath, 'w') as f:
+                f.write(new_data)
+        return occurrences
+
     if len(patterns) == 1:
         return find_single_pattern(patterns[0])
+    if len(patterns) == 2 and replace:
+        return replace_patterns(patterns)
     else:
         return find_multi_patterns(patterns)
 
@@ -125,7 +136,7 @@ def main(argv=None):
             exts[i] = '.' + ext
     exts = set(exts)
 
-    patterns = list(set(args['<pattern>']))
+    patterns = args['<pattern>']
     replace = args['--replace']
 
     # run
