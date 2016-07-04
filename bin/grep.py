@@ -8,17 +8,19 @@ Recursively grep (or replaces) occurrences of <str> in all "dev" files
 in this directory.  Very similar to "ack" CLI util."
 
 Usage:
-    grep.py [-e <exts>] [-r] [-i] [<pattern> ...]
+    grep.py [-e <exts>] [-r] [-i] [-n <lines>] [<pattern> ...]
 
 Options:
-    -e <exts> --exts=<exts>   # a list of extensions defult=%s
     -r --replace              # replace 2 patterns
     -i --ignore-case          # case insensitive
+    -e <exts> --exts=<exts>   # a list of extensions defult=%s
+    -n <lines> --nlines=<lines>  # number of lines to print above and below
 
 Examples:
     grep.py -e py,c,h pattern    # extensions
     grep.py foo bar              # search for 'foo' AND 'bar' on the same line
     grep.py -r foo bar           # replaces 'foo' with 'bar'
+    grep.py foo -n 5             # prints also the 5 pre and post lines
 """
 
 from __future__ import print_function
@@ -30,6 +32,8 @@ from docopt import docopt
 from sysconf import hilite
 
 
+PY3 = sys.version_info[0] == 3
+TERMINAL_SIZE_FALLBACK = 2
 DEFAULT_EXTS = [
     'c',
     'h',
@@ -53,7 +57,27 @@ IGNORE_ROOT_DIRS = [
 __doc__ = __doc__ % str(tuple(DEFAULT_EXTS))
 
 
-def grep_file(filepath, patterns, replace=False, ignore_case=False):
+
+def get_terminal_size():
+    try:
+        from shutil import get_terminal_size as gts
+    except ImportError:
+        try:
+            import fcntl, termios, struct
+            hw = struct.unpack('hh', fcntl.ioctl(
+                1, termios.TIOCGWINSZ, '1234'))
+            return hw[1]
+        except Exception as exc:
+            return TERMINAL_SIZE_FALLBACK
+    else:
+         gts(fallback(TERMINAL_SIZE_FALLBACK, 0))[0]
+
+
+TERMINAL_SIZE = get_terminal_size()
+
+
+def grep_file(filepath, patterns, replace=False, ignore_case=False,
+              nlines=0):
     def get_file_content():
         with open(filepath, 'r') as f:
             data = f.read()
@@ -61,10 +85,43 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False):
             data = data.lower()
         return data
 
+    def print_pre_lines(lines, orig_pos):
+        curr_pos = orig_pos - nlines
+        print("." * TERMINAL_SIZE)
+        while curr_pos < 0 or curr_pos < orig_pos:
+            try:
+                if curr_pos < 0:
+                    continue
+                line = lines[curr_pos]
+            except KeyError:
+                pass
+            else:
+                print("%s: %s" % (
+                    hilite(curr_pos + 1, ok=None, bold=1), line.rstrip()))
+            finally:
+                curr_pos += 1
+
+    def print_post_lines(lines, orig_pos):
+        curr_pos = orig_pos
+        exit_at = curr_pos + nlines
+        while curr_pos != exit_at:
+            try:
+                if curr_pos < 0:
+                    continue
+                line = lines[curr_pos]
+            except IndexError:
+                # We reached the end of lines
+                break
+            else:
+                print("%s: %s" % (
+                    hilite(curr_pos + 1, ok=None, bold=1), line.rstrip()))
+            finally:
+                curr_pos += 1
+
     def print_occurrences(lines, patterns):
         if not isinstance(lines, list):
             # probably a file object
-            lines = iter(lines)
+            lines = list(lines)
         occurrences = 0
         header_printed = False
         for lineno, line in enumerate(lines, 1):
@@ -78,12 +135,18 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False):
                 if not header_printed:
                     print(hilite(filepath, bold=1))
                     header_printed = True
-                # Note: if case-sensitive, this may not highlit the
+                # Print the N lines previous to this match.
+                if nlines:
+                    print_pre_lines(lines, lineno - 1)
+                # Note: if case-sensitive, this may not highlight the
                 # line (well... who cares =)).
                 for pattern in patterns:
                     line = line.replace(pattern, hilite(pattern))
                 print("%s: %s" % (
                     hilite(lineno, ok=None, bold=1), line.rstrip()))
+                # Print the N lines post to this match.
+                if nlines:
+                    print_post_lines(lines, lineno)
                 occurrences += 1
         if occurrences:
             print()
@@ -135,7 +198,7 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False):
 
 
 def main(argv=None):
-    # CLI
+    # CLI parsing.
     args = docopt(__doc__, argv=None)
     if args['--exts']:
         exts = args['--exts'].split(',')
@@ -147,13 +210,13 @@ def main(argv=None):
         if not ext.startswith('.'):
             exts[i] = '.' + ext
     exts = set(exts)
-
     patterns = args['<pattern>']
     replace = args['--replace']
     ignore_case = args['--ignore-case']
-
-    # run
+    nlines = int(args['--nlines']) if args['--nlines'] else 0
     start_ext = exts == set(['.*'])
+
+    # Run.
     files_matching = 0
     occurrences = 0
     for root, dirs, files in os.walk('.', topdown=False):
@@ -169,7 +232,8 @@ def main(argv=None):
                         continue   # skip
             filepath = os.path.join(root, name)
             ocs = grep_file(
-                filepath, patterns, replace=replace, ignore_case=ignore_case)
+                filepath, patterns,
+                replace=replace, ignore_case=ignore_case, nlines=nlines)
             occurrences += ocs
             if ocs:
                 files_matching += 1
