@@ -7,14 +7,14 @@ Recursively grep (or replaces) occurrences of <str> in all "dev" files
 in this directory.  Very similar to "ack" CLI util."
 
 Usage:
-    grep.py [-e <exts>] [-r] [<defern> ...]
+    grep.py [-e <exts>] [-r] [<pattern> ...]
 
 Options:
     -e <exts> --exts=<exts>   # a list of extensions defult=%s
-    -r --replace              # replace 2 deferns
+    -r --replace              # replace 2 patterns
 
 Examples:
-    grep.py -e py,c,h defern    # extensions
+    grep.py -e py,c,h pattern    # extensions
     grep.py foo bar              # search for 'foo' and 'bar' on the same line
     grep.py -r foo bar           # replaces 'foo' with 'bar'
 """
@@ -51,23 +51,23 @@ IGNORE_ROOT_DIRS = [
 __doc__ = __doc__ % str(tuple(DEFAULT_EXTS))
 
 
-def grep_file(filepath, deferns, replace=False):
-    def print_occurrences(lines, deferns):
+def grep_file(filepath, patterns, replace=False):
+    def print_occurrences(lines, patterns):
         if not isinstance(lines, list):
             # probably a file object
             lines = iter(lines)
         occurrences = 0
         header_printed = False
         for lineno, line in enumerate(lines, 1):
-            for defern in deferns:
-                if defern not in line:
+            for pattern in patterns:
+                if pattern not in line:
                     break
             else:
                 if not header_printed:
                     print(hilite(filepath, bold=1))
                     header_printed = True
-                for defern in deferns:
-                    line = line.replace(defern, hilite(defern))
+                for pattern in patterns:
+                    line = line.replace(pattern, hilite(pattern))
                 print("%s: %s" % (
                     hilite(lineno, ok=None, bold=1), line.strip()))
                 occurrences += 1
@@ -80,35 +80,35 @@ def grep_file(filepath, deferns, replace=False):
         with open(filepath, 'w') as f:
             f.write(new_data)
 
-    def find_single_defern(defern):
-        assert isinstance(defern, basestring)
+    def find_single_pattern(pattern):
+        assert isinstance(pattern, basestring)
         with open(filepath, 'r') as f:
             data = f.read()
         occurrences = 0
-        if defern in data:
+        if pattern in data:
             lines = data.splitlines()
-            occurrences += print_occurrences(lines, deferns)
+            occurrences += print_occurrences(lines, patterns)
         return occurrences
 
-    def find_multi_deferns(deferns):
-        assert isinstance(deferns, list)
-        if replace and len(deferns) != 2:
-            sys.exit("with --replace you must specifcy 2 <defern>s")
-        if deferns[0] == deferns[1]:
-            sys.exit("<defern>s can't be equal")
+    def find_multi_patterns(patterns):
+        assert isinstance(patterns, list)
+        if replace and len(patterns) != 2:
+            sys.exit("with --replace you must specifcy 2 <pattern>s")
+        if patterns[0] == patterns[1]:
+            sys.exit("<pattern>s can't be equal")
         with open(filepath, 'r') as f:
-            occurrences = print_occurrences(f, set(deferns))
+            occurrences = print_occurrences(f, set(patterns))
         if occurrences and replace:
             with open(filepath, 'r') as f:
                 data = f.read()
-            src, dst = deferns
+            src, dst = patterns
             replace_in_file(data, src, dst)
         return occurrences
 
-    if len(deferns) == 1:
-        return find_single_defern(deferns[0])
+    if len(patterns) == 1:
+        return find_single_pattern(patterns[0])
     else:
-        return find_multi_deferns(deferns)
+        return find_multi_patterns(patterns)
 
 
 def main(argv=None):
@@ -125,9 +125,8 @@ def main(argv=None):
             exts[i] = '.' + ext
     exts = set(exts)
 
-    deferns = list(set(args['<defern>']))
+    patterns = list(set(args['<pattern>']))
     replace = args['--replace']
-    print(args)
 
     # run
     start_ext = exts == set(['.*'])
@@ -146,7 +145,7 @@ def main(argv=None):
                         continue   # skip
             filepath = os.path.join(root, name)
             ocs = grep_file(
-                filepath, deferns, replace=replace)
+                filepath, patterns, replace=replace)
             occurrences += ocs
             if ocs:
                 files_matching += 1
