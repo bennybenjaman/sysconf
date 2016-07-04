@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2016 Giampaolo Rodola'. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -7,8 +7,13 @@
 # TODO: may want to implement also the AND logic, not only OR
 
 """
-Recursively search a string in all directory files.
-Very similar to "ack" command.
+Recursively search a string occurrence in all files of this directory.
+Very similar to "ack" command, just simpler. Features:
+- simple search
+- case insensitive search
+- search & replace
+- logical AND search for multiple patterns on the same line
+- colors
 
 Usage:
     grep.py [-e <exts>] [-r] [-i] [-n <lines>] [<pattern> ...]
@@ -20,10 +25,10 @@ Options:
     -n <lines> --nlines=<lines>  # number of lines to print above and below
 
 Examples:
-    grep.py -e py,c,h pattern    # extensions
-    grep.py foo bar              # search for 'foo' AND 'bar' on the same line
-    grep.py -r foo bar           # replaces 'foo' with 'bar'
-    grep.py foo -n 5             # prints also the 5 pre and post lines
+    grep.py -e py,c,h pattern  # search for specific extensions
+    grep.py foo bar            # search for 'foo' AND 'bar' on the same line
+    grep.py -r foo bar         # replaces 'foo' with 'bar'
+    grep.py foo -n 5           # prints the 5 lines before and after the match
 """
 
 from __future__ import print_function
@@ -59,11 +64,17 @@ IGNORE_ROOT_DIRS = [
 __doc__ = __doc__ % str(tuple(DEFAULT_EXTS))
 
 
+# ===================================================================
+# utils
+# ===================================================================
+
 def get_terminal_size():
     try:
+        # Added in Python 3.3
         from shutil import get_terminal_size as gts
     except ImportError:
         try:
+            # This should work on Linux.
             import fcntl
             import termios
             import struct
@@ -119,6 +130,16 @@ def hilite(s, ok=True, bold=False):
     if bold:
         attr.append('1')
     return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
+
+
+def exit(msg):
+    print(hilite(msg, ok=False), file=sys.stderr)
+    sys.exit(1)
+
+
+# ===================================================================
+# implementation
+# ===================================================================
 
 
 def grep_file(filepath, patterns, replace=False, ignore_case=False,
@@ -209,7 +230,7 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
     def find_multi_patterns(patterns):
         assert isinstance(patterns, list)
         if replace and len(patterns) != 2:
-            sys.exit("with --replace you must specifcy 2 <pattern>s")
+            exit("with --replace you must specifcy 2 <pattern>s")
         with open(filepath, 'r') as f:
             occurrences = print_occurrences(f, set(patterns))
         return occurrences
@@ -230,13 +251,14 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
 
     if ignore_case:
         patterns = [x.lower() for x in patterns]
+
     if len(set(patterns)) != len(patterns):
-        sys.exit("<pattern>s can't be equal")
-    if len(patterns) == 1 and not ignore_case:
+        exit("<pattern>s can't be equal")
+    elif len(patterns) == 1 and not ignore_case:
         return find_single_pattern(patterns[0])
-    if len(patterns) == 2 and replace:
+    elif len(patterns) == 2 and replace:
         if ignore_case:
-            sys.exit("can't user --ignore-case with --replace")
+            exit("can't user --ignore-case with --replace")
         return replace_patterns(patterns)
     else:
         return find_multi_patterns(patterns)
@@ -251,7 +273,7 @@ def main(argv=None):
         exts = DEFAULT_EXTS
     for i, ext in enumerate(exts):
         if not ext.isalnum() and ext != '*':
-            sys.exit("invalid extension %s" % ext)
+            exit("invalid extension %s" % ext)
         if not ext.startswith('.'):
             exts[i] = '.' + ext
     exts = set(exts)
