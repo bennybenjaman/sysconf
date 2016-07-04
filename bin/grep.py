@@ -7,15 +7,16 @@ Recursively grep (or replaces) occurrences of <str> in all "dev" files
 in this directory.  Very similar to "ack" CLI util."
 
 Usage:
-    grep.py [-e <exts>] [-r] [<pattern> ...]
+    grep.py [-e <exts>] [-r] [-i] [<pattern> ...]
 
 Options:
     -e <exts> --exts=<exts>   # a list of extensions defult=%s
     -r --replace              # replace 2 patterns
+    -i --ignore-case          # case insensitive
 
 Examples:
     grep.py -e py,c,h pattern    # extensions
-    grep.py foo bar              # search for 'foo' and 'bar' on the same line
+    grep.py foo bar              # search for 'foo' AND 'bar' on the same line
     grep.py -r foo bar           # replaces 'foo' with 'bar'
 """
 
@@ -51,7 +52,14 @@ IGNORE_ROOT_DIRS = [
 __doc__ = __doc__ % str(tuple(DEFAULT_EXTS))
 
 
-def grep_file(filepath, patterns, replace=False):
+def grep_file(filepath, patterns, replace=False, ignore_case=False):
+    def get_file_content():
+        with open(filepath, 'r') as f:
+            data = f.read()
+        if ignore_case:
+            data = data.lower()
+        return data
+
     def print_occurrences(lines, patterns):
         if not isinstance(lines, list):
             # probably a file object
@@ -60,16 +68,19 @@ def grep_file(filepath, patterns, replace=False):
         header_printed = False
         for lineno, line in enumerate(lines, 1):
             for pattern in patterns:
-                if pattern not in line:
+                curr_line = line if not ignore_case else line.lower()
+                if pattern not in curr_line:
                     break
             else:
                 if not header_printed:
                     print(hilite(filepath, bold=1))
                     header_printed = True
+                # Note: if case-sensitive, this may not highlit the
+                # line (well... who cares =)).
                 for pattern in patterns:
                     line = line.replace(pattern, hilite(pattern))
                 print("%s: %s" % (
-                    hilite(lineno, ok=None, bold=1), line.strip()))
+                    hilite(lineno, ok=None, bold=1), line.rstrip()))
                 occurrences += 1
         if occurrences:
             print()
@@ -77,8 +88,7 @@ def grep_file(filepath, patterns, replace=False):
 
     def find_single_pattern(pattern):
         assert isinstance(pattern, basestring)
-        with open(filepath, 'r') as f:
-            data = f.read()
+        data = get_file_content()
         occurrences = 0
         if pattern in data:
             lines = data.splitlines()
@@ -89,15 +99,8 @@ def grep_file(filepath, patterns, replace=False):
         assert isinstance(patterns, list)
         if replace and len(patterns) != 2:
             sys.exit("with --replace you must specifcy 2 <pattern>s")
-        if patterns[0] == patterns[1]:
-            sys.exit("<pattern>s can't be equal")
         with open(filepath, 'r') as f:
             occurrences = print_occurrences(f, set(patterns))
-        if occurrences and replace:
-            with open(filepath, 'r') as f:
-                data = f.read()
-            src, dst = patterns
-            replace_in_file(data, src, dst)
         return occurrences
 
     def replace_patterns(patterns):
@@ -114,9 +117,15 @@ def grep_file(filepath, patterns, replace=False):
                 f.write(new_data)
         return occurrences
 
-    if len(patterns) == 1:
+    if ignore_case:
+        patterns = [x.lower() for x in patterns]
+    if len(set(patterns)) != len(patterns):
+        sys.exit("<pattern>s can't be equal")
+    if len(patterns) == 1 and not ignore_case:
         return find_single_pattern(patterns[0])
     if len(patterns) == 2 and replace:
+        if ignore_case:
+            sys.exit("can't user --ignore-case with --replace")
         return replace_patterns(patterns)
     else:
         return find_multi_patterns(patterns)
@@ -138,6 +147,7 @@ def main(argv=None):
 
     patterns = args['<pattern>']
     replace = args['--replace']
+    ignore_case = args['--ignore-case']
 
     # run
     start_ext = exts == set(['.*'])
@@ -156,7 +166,7 @@ def main(argv=None):
                         continue   # skip
             filepath = os.path.join(root, name)
             ocs = grep_file(
-                filepath, patterns, replace=replace)
+                filepath, patterns, replace=replace, ignore_case=ignore_case)
             occurrences += ocs
             if ocs:
                 files_matching += 1
