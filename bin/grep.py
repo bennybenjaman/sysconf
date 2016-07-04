@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# TODO: case-insnsitive
+# TODO: may want to implement also the AND logic, not only OR
+# TODO: implement num of lines above and below
 
 """
 Recursively grep (or replaces) occurrences of <str> in all "dev" files
@@ -68,8 +69,10 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False):
         header_printed = False
         for lineno, line in enumerate(lines, 1):
             for pattern in patterns:
-                curr_line = line if not ignore_case else line.lower()
-                if pattern not in curr_line:
+                # lowercase() the line on the fly, but we want to keep
+                # the original one around in order to print it.
+                temp_line = line if not ignore_case else line.lower()
+                if pattern not in temp_line:
                     break
             else:
                 if not header_printed:
