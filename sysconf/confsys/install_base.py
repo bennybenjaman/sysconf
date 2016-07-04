@@ -5,7 +5,6 @@ Install system packages.
 import os
 import subprocess
 
-from sysconf.lib import logtitle
 from sysconf.lib import LINUX
 from sysconf.lib import install_pkg
 from sysconf.lib import sh
@@ -31,6 +30,5 @@ def pkg_linux():
 
 
 def main():
-    logtitle("install system base packages")
     if LINUX:
         pkg_linux()

@@ -2,7 +2,6 @@ import os
 import textwrap
 
 from sysconf.lib import LINUX
-from sysconf.lib import logtitle
 from sysconf.lib import sh
 from sysconf.lib import skip_if
 from sysconf.lib import SkipTask

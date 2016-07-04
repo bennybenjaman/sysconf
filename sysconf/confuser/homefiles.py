@@ -6,7 +6,6 @@ import os
 
 from sysconf.lib import DIR_HOME
 from sysconf.lib import DIR_STATIC_HOME
-from sysconf.lib import logtitle
 from sysconf.lib import safe_remove
 from sysconf.lib import symlink
 

@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+Usage:
+    make install                             # install all
+    setup.py confuser|confsys <subcmd>       # run specific subcmd
+"""
+
+
 import importlib
 import os
 import pip  # NOQA
@@ -34,34 +41,62 @@ def install_pkg():
     )
 
 
-def run_scripts_in_dir(path):
+def run_script_by_path(path):
     from sysconf.lib import log
     from sysconf.lib import logtitle
     from sysconf.lib import SkipTask
 
+    if path.endswith('.py'):
+        path = os.path.splitext(path)[0]
+    modname = path.replace('/', '.')
+    logtitle("running %s" % modname)
+    mod = importlib.import_module(modname)
+    try:
+        mod.main()
+    except SkipTask as exc:
+        log("skip", str(exc))
+
+
+def run_scripts_in_dir(path):
     for name in os.listdir(path):
         if not name.startswith('_') and name.endswith('.py'):
-            modname = path.replace('/', '.') + '.' + os.path.splitext(name)[0]
-            logtitle("running %s" % modname)
-            mod = importlib.import_module(modname)
-            try:
-                mod.main()
-            except SkipTask as exc:
-                log("skip", str(exc))
-
-
-def confuser():
-    run_scripts_in_dir('sysconf/confuser')
-
-def confsys():
-    run_scripts_in_dir('sysconf/confsys')
-
+            run_script_by_path(os.path.join(path, name))
 
 
 def main():
-    install_pkg()
-    confuser()
-    confsys()
+    if sys.argv == ['setup.py', 'develop', '--user']:
+        install_pkg()
+        run_scripts_in_dir('sysconf/confuser')
+        run_scripts_in_dir('sysconf/confsys')
+    else:
+        # CLI parser
+        from sysconf.lib import hilite
+
+        def get_avail_subcmds(subcmd):
+            ls = []
+            for name in os.listdir('sysconf/' + subcmd):
+                if not name.startswith('_') and name.endswith('.py'):
+                    ls.append(name)
+            return ls
+
+
+        if len(sys.argv) < 2:
+            return sys.exit(__doc__.strip())
+
+        subcmd = sys.argv[1]
+        if subcmd not in ('confuser', 'confsys'):
+            sys.exit(__doc__.strip())
+
+        # list sub cmds
+        if len(sys.argv) == 2:
+            subs = get_avail_subcmds(subcmd)
+            print("available sub commands:")
+            for name in subs:
+                print "  " + hilite(os.path.splitext(name)[0], ok=None, bold=1)
+        # execute sub cmd
+        else:
+            run_script_by_path(os.path.join('sysconf', subcmd, sys.argv[2]))
+
 
 
 
