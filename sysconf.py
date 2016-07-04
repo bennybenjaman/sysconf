@@ -17,10 +17,10 @@ PY3 = sys.version_info[0] == 3
 # =============================================================================
 
 
-DIR_ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
-DIR_BIN = os.path.join(DIR_ROOT, 'sysconf/bin')
-DIR_STATIC = os.path.join(DIR_ROOT, 'sysconf/static')
-DIR_STATIC_HOME = os.path.join(DIR_ROOT, 'sysconf/static/home')
+DIR_ROOT = HERE
+DIR_BIN = os.path.join(DIR_ROOT, 'bin')
+DIR_STATIC = os.path.join(DIR_ROOT, 'static')
+DIR_STATIC_HOME = os.path.join(DIR_ROOT, 'static/home')
 DIR_HOME = os.path.expanduser("~")
 
 

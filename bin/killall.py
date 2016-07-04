@@ -17,7 +17,7 @@ import psutil
 
 from docopt import docopt
 
-from sysconf.lib import hilite
+from sysconf import hilite
 
 
 THIS_PID = os.getpid()

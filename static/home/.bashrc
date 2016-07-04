@@ -162,6 +162,10 @@ fi
 # completion for sudo
 complete -cf sudo
 
+# thefuck
+if type -P thefuck > /dev/null; then
+    eval $(thefuck --alias)
+fi
 
 # ===========================================================================
 # Aliases

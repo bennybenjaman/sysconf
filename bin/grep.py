@@ -25,7 +25,7 @@ import sys
 
 from docopt import docopt
 
-from sysconf.lib import hilite
+from sysconf import hilite
 
 
 DEFAULT_EXTS = [

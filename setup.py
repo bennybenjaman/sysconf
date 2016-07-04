@@ -31,12 +31,8 @@ def install_pkg():
         platforms='Platform Independent',
         author="Giampaolo Rodola'",
         author_email='g.rodola@gmail.com',
-        packages=[
+        py_modules=[
             'sysconf',
-            'sysconf.bin',
-            'sysconf.sys',
-            'sysconf.user',
-            'sysconf.lib',
         ],
         install_packages=[
             'docopt',
@@ -45,19 +41,19 @@ def install_pkg():
 
 
 def run_sysinstall():
-    from sysconf.lib import sh, logtitle
+    from sysconf import sh, logtitle
     logtitle('running sys install')
     sh("./scripts/sysinstall", sudo=True)
 
 
 def run_sysconfig():
-    from sysconf.lib import sh, logtitle
+    from sysconf import sh, logtitle
     logtitle('running sys config')
     sh("./scripts/sysconfig", sudo=True)
 
 
 def run_userconfig():
-    from sysconf.lib import sh, logtitle
+    from sysconf import sh, logtitle
     logtitle('running user config')
     sh("./scripts/userconfig")
 
