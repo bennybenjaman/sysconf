@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-CIao ciao.
+Personal (Giampaolo) system config utilities to install on a brand new
+UNIX system. More at: https://github.com/giampaolo/sysconf
 
 Usage:
     setup sysinstall
@@ -11,9 +12,7 @@ Usage:
 """
 
 
-import importlib
 import os
-import pip  # NOQA
 import sys
 from setuptools import setup
 
@@ -27,7 +26,7 @@ def install_pkg():
     setup(
         name='sysconf',
         version='0.1',
-        description='Personal (giampaolo) system utils',
+        description='Personal (Giampaolo) UNIX system utils',
         license='MIT',
         platforms='Platform Independent',
         author="Giampaolo Rodola'",

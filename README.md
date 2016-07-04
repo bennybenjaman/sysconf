@@ -25,3 +25,14 @@ make runall         # do the 3 above
 
 **WARNING**: these are my personal system settings; your tastes may differ so
 be aware!
+
+Interesting stand-alone parts which may be useful
+=================================================
+
+* [home/.bashrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.bashrc)
+* [home/.vimrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.vimrc)
+* [home/.pythonstart](https://github.com/giampaolo/sysconf/blob/master/static/home/.pythonstart): auto-completion for the interatctive interpreter
+* [bin/grep.py](https://github.com/giampaolo/sysconf/blob/master/bin/grep.py):
+  a clone of "ack" command but simpler.
+* [bin/killall.py](https://github.com/giampaolo/sysconf/blob/master/bin/killall.py):
+  a clone of "killall" command but it tries harder to kill a process.
