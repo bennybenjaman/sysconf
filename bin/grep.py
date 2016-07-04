@@ -23,6 +23,7 @@ Examples:
 """
 
 from __future__ import print_function
+import collections
 import os
 import sys
 
@@ -67,10 +68,10 @@ def get_terminal_size():
             hw = struct.unpack('hh', fcntl.ioctl(
                 1, termios.TIOCGWINSZ, '1234'))
             return hw[1]
-        except Exception as exc:
+        except Exception:
             return TERMINAL_SIZE_FALLBACK
     else:
-        gts(fallback(TERMINAL_SIZE_FALLBACK, 0))[0]
+        gts(fallback=(TERMINAL_SIZE_FALLBACK, 0))[0]
 
 
 TERMINAL_SIZE = get_terminal_size()
@@ -219,14 +220,16 @@ def main(argv=None):
     # Run.
     files_matching = 0
     occurrences = 0
+    exts_map = collections.defaultdict(int)
     for root, dirs, files in os.walk('.', topdown=False):
         parent_root = os.path.normpath(root).split('/')[0]
-        if parent_root in IGNORE_ROOT_DIRS:
+        if parent_root in IGNORE_ROOT_DIRS and os.path.isdir(parent_root):
             continue  # skip
         if parent_root.endswith('.egg-info'):
             continue  # skip
         for name in files:
-            if os.path.splitext(name)[1] not in exts:
+            ext = os.path.splitext(name)[1]
+            if ext not in exts:
                 if name not in SPECIAL_NAMES:
                     if not start_ext:
                         continue   # skip
@@ -237,11 +240,18 @@ def main(argv=None):
             occurrences += ocs
             if ocs:
                 files_matching += 1
+                exts_map[ext] += 1
 
     if occurrences:
-        print("occurrences=%s, files-matching=%s" % (
+        # Print final stats.
+        exts_stats = []
+        for k, v in sorted(exts_map.items(), key=lambda v: v[1], reverse=1):
+            exts_stats.append("%s=%s" % (k, hilite(v)))
+
+        print("occurrences=%s, files-matching=%s, exts=(%s)" % (
             hilite(occurrences, bold=1),
-            hilite(files_matching, bold=1)
+            hilite(files_matching, bold=1),
+            ','.join(exts_stats),
         ))
 
 
