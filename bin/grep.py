@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Copyright (c) 2016 Giampaolo Rodola'. All rights reserved.
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
+# Use of this source code is governed by a BSD-style license.
 
-# TODO: may want to implement also the AND logic, not only OR
+# TODO: implement AND logic, not only OR
+# TODO: regular expressions?
 
 """
 Recursively search a string occurrence in all files of this directory.
@@ -40,6 +40,8 @@ from docopt import docopt
 
 
 PY3 = sys.version_info[0] == 3
+if PY3:
+    basestring = str
 TERMINAL_SIZE_FALLBACK = 2
 DEFAULT_EXTS = [
     'c',
@@ -163,7 +165,7 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
                 pass
             else:
                 print("%s: %s" % (
-                    hilite(curr_pos + 1, ok=None, bold=1), line.rstrip()))
+                    hilite(curr_pos + 1, ok=None, bold=True), line.rstrip()))
             finally:
                 curr_pos += 1
 
@@ -180,11 +182,12 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
                 break
             else:
                 print("%s: %s" % (
-                    hilite(curr_pos + 1, ok=None, bold=1), line.rstrip()))
+                    hilite(curr_pos + 1, ok=None, bold=True),
+                    line.rstrip()))
             finally:
                 curr_pos += 1
 
-    def print_occurrences(lines, patterns):
+    def find_occurrences(lines, patterns):
         if not isinstance(lines, list):
             # probably a file object
             lines = list(lines)
@@ -199,7 +202,7 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
                     break
             else:
                 if not header_printed:
-                    print(hilite(filepath, bold=1))
+                    print(hilite(filepath, bold=True))
                     header_printed = True
                 # Print the N lines previous to this match.
                 if nlines:
@@ -209,7 +212,7 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
                 for pattern in patterns:
                     line = line.replace(pattern, hilite(pattern))
                 print("%s: %s" % (
-                    hilite(lineno, ok=None, bold=1), line.rstrip()))
+                    hilite(lineno, ok=None, bold=True), line.rstrip()))
                 # Print the N lines post to this match.
                 if nlines:
                     print_post_lines(lines, lineno)
@@ -224,7 +227,7 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
         occurrences = 0
         if pattern in data:
             lines = data.splitlines()
-            occurrences += print_occurrences(lines, patterns)
+            occurrences += find_occurrences(lines, patterns)
         return occurrences
 
     def find_multi_patterns(patterns):
@@ -232,7 +235,7 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
         if replace and len(patterns) != 2:
             exit("with --replace you must specifcy 2 <pattern>s")
         with open(filepath, 'r') as f:
-            occurrences = print_occurrences(f, set(patterns))
+            occurrences = find_occurrences(f, set(patterns))
         return occurrences
 
     def replace_patterns(patterns):
@@ -244,7 +247,7 @@ def grep_file(filepath, patterns, replace=False, ignore_case=False,
         if data != new_data:
             occurrences = data.count(src)
             print("%s (%s occurrences)" % (
-                hilite(filepath, bold=1), hilite(occurrences)))
+                hilite(filepath, bold=True), hilite(occurrences)))
             with open(filepath, 'w') as f:
                 f.write(new_data)
         return occurrences
@@ -315,8 +318,8 @@ def main(argv=None):
             exts_stats.append("%s=%s" % (k, hilite(v)))
 
         print("occurrences=%s, files-matching=%s, exts=(%s)" % (
-            hilite(occurrences, bold=1),
-            hilite(files_matching, bold=1),
+            hilite(occurrences, bold=True),
+            hilite(files_matching, bold=True),
             ','.join(exts_stats),
         ))
 
