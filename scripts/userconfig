@@ -2,34 +2,57 @@
 
 import os
 
+from sysconf import cwd
 from sysconf import DIR_HOME
 from sysconf import DIR_STATIC_HOME
+from sysconf import is_x_running
 from sysconf import LINUX
-from sysconf import safe_remove
+from sysconf import log
+from sysconf import logerr
+from sysconf import logtitle
 from sysconf import safe_makedirs
+from sysconf import safe_remove
 from sysconf import sh
 from sysconf import symlink
+from sysconf import wget
 from sysconf import which
 
 
+SUBL_USERDIR = os.path.join(
+    DIR_HOME, '.config/sublime-text-3/Packages/User')
+SUBL_INSTPKGDIR = os.path.join(
+    DIR_HOME, '.config/sublime-text-3/Installed Packages')
+SUBL_PKGMGR_URL = "https://sublime.wbond.net/Package%20Control.sublime-package"
+
+
 def main():
-    # Copy user "hidden" config files.
+    # copy user home config files
+    logtitle("symlinking user cfg files")
     for name in os.listdir(DIR_STATIC_HOME):
         src = os.path.join(DIR_STATIC_HOME, name)
         dst = os.path.join(DIR_HOME, name)
-        if name.startswith('.') and os.path.isfile(src):
+        if os.path.isfile(src):
             safe_remove(dst)
             symlink(src, dst)
 
     # configure git
     if which('git'):
+        logtitle("configuring git")
         sh("git config --global push.default simple")
+    else:
+        logerr('git', 'git not installed')
 
+
+    # configure sublime
     if LINUX:
+        if not is_x_running():
+            logerr('sublime', "X server not running")
+            return
+
+        logtitle("symlinking sublime config files")
         srcdir = os.path.join(
             DIR_STATIC_HOME, '.config/sublime-text-3/Packages/User')
-        dstdir = os.path.join(
-            DIR_HOME, '.config/sublime-text-3/Packages/User')
+        dstdir = SUBL_USERDIR
         # safe_rmtree(dstdir)
         # safe_makedirs(os.path.dirname(dstdir))
         sh("rm -rf %s" % os.path.dirname(dstdir))
@@ -37,5 +60,12 @@ def main():
         os.listdir(srcdir)
         symlink(srcdir, dstdir)
 
+        # install sublime pkg manager
+        safe_makedirs(SUBL_INSTPKGDIR)
+        with cwd(SUBL_INSTPKGDIR):
+            if not os.path.exists('Package Control.sublime-package'):
+                logtitle("downloading and install sublime pkg manager")
+                wget(SUBL_PKGMGR_URL, 'Package Control.sublime-package')
+                log('sublime', 'pkg mgr installed')
 
 main()

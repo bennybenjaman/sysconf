@@ -6,6 +6,7 @@ I want bash to use Python.
 Import it as "from sysconf import something"
 """
 
+import contextlib
 import errno
 import functools
 import os
@@ -141,8 +142,9 @@ def sh(cmd, sudo=False):
         if os.geteuid() != 0 and which('sudo'):
             cmd = 'sudo ' + cmd
     log("sh", cmd)
-    ret = os.system(cmd)
-    if ret != 0:
+    code = os.system(cmd)
+    if code != 0:
+        logerr('sh', 'cmd failed (code=%s); exiting interprter' % code)
         raise SystemExit
 
 
@@ -265,6 +267,7 @@ def safe_remove(path):
 
 def safe_makedirs(path, mode=None):
     "Same as os.makedirs() but doesn't raise exception if dir already exists"
+    log("mkdir -p", path)
     try:
         os.makedirs(path, **dict(mode=mode) if mode is not None else {})
     except OSError as err:
@@ -275,18 +278,16 @@ def safe_makedirs(path, mode=None):
                 os.chmod(path, mode)
         else:
             raise
-    else:
-        log("mkdir -p", path)
 
 
 def safe_rmtree(path):
     "Same as shutil.rmtree but doesn't raise exception if path does not exist"
+    log("rmtree", path)
     def onerror(fun, path, excinfo):
         exc = excinfo[1]
         if exc.errno != errno.ENOENT:
             raise
 
-    log("rmtree", path)
     shutil.rmtree(path, onerror=onerror)
 
 
@@ -302,15 +303,42 @@ def safe_rmpath(path):
 
 def touch(name):
     """Create a file and return its name."""
+    log("touch", name)
     parent = os.path.dirname(name)
     if parent:
         safe_makedirs(parent)
     with open(name, 'w') as f:
         return f.name
-    log("touch", name)
 
 
-def str_in_file(s, file):
-    with open(file, 'rb') as f:
-        data = f.read()
-    return s in data
+@contextlib.contextmanager
+def cwd(path):
+    cur_dir = os.getcwd()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(cur_dir)
+
+
+# =============================================================================
+# --- network
+# =============================================================================
+
+
+def wget(url, file):
+    sh('wget --no-check-certificate %s -O "%s" ' % (url, file))
+
+
+# =============================================================================
+# --- sys
+# =============================================================================
+
+
+def is_x_running():
+    if not which('xset'):
+        return False
+    p = subprocess.Popen(["xset", "-q"],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p.communicate()
+    return p.returncode == 0
