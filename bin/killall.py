@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
 """
-Kill a process by name.
+Kill a process by name. Similar to 'killall' command, it just tries
+harder to kill the process by:
+- inspecting both name and cmdline
+- sending also SIGKILL is process survives SIGTERM
 
 Usage:
     killall.py [-d] [-t] [-v] <name>
 
 Options:
-    -d --dryrun     # just print processes matchin <name> without killing
+    -d --dryrun     # just print processes matching <name> without killing them
     -t --timeout    # how much to wait for proc to die
     -v --verbose    # print more info about the process
 """
