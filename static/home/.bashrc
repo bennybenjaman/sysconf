@@ -87,8 +87,7 @@ fi
 # http://stackoverflow.com/a/5130969/376587
 # "ls | c" copies the output, "v" paste it in the terminal
 if [[ $PLATFORM == *linux* ]]; then
-    alias "c=xclip"
-    alias "cc=xclip -selection clipboard"  # copy to GUI
+    alias "c=xclip -selection clipboard"
     alias "v=xclip -o"
 fi
 
