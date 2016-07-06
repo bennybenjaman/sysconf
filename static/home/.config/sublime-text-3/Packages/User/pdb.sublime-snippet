@@ -1,5 +1,5 @@
 <snippet>
-    <content>import ipdb; ipdb.set_trace()</content>
+    <content>from nose.tools import set_trace; set_trace()</content>
     <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
     <tabTrigger>pdb</tabTrigger>
     <!-- Optional: Set a scope to limit where the snippet will trigger -->

@@ -34,7 +34,7 @@ def install_pkg():
         py_modules=[
             'sysconf',
         ],
-        install_packages=[
+        install_requires=[
             'docopt',
         ]
     )
