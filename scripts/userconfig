@@ -42,6 +42,12 @@ def main():
     else:
         logerr('git', 'git not installed')
 
+    # transmission
+    logtitle("symlinking transmission cfg file")
+    src = os.path.join(DIR_STATIC_HOME, '.config/transmission/settings.json')
+    dst = os.path.join(DIR_HOME, '.config/transmission/settings.json')
+    safe_remove(dst)
+    symlink(src, dst)
 
     # configure sublime
     if LINUX:

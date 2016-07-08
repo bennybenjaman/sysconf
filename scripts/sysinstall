@@ -3,7 +3,7 @@
 set -e
 set -x
 
-PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+# PIP_URL="https://bootstrap.pypa.io/get-pip.py"
 
 if [ "$(id -u)" != "0" ]; then
     echo "must be root" && exit 1
@@ -40,13 +40,13 @@ END
 }
 
 
-install_pip() {
-    if type -P pip > /dev/null; then
-        sh_net_httpfetch $PIP_URL > /tmp/get-pip.py
-        python /tmp/get-pip.py
-        rm /tmp/get-pip.py
-    fi
-}
+# install_pip() {
+#     if type -P pip > /dev/null; then
+#         sh_net_httpfetch $PIP_URL > /tmp/get-pip.py
+#         python /tmp/get-pip.py
+#         rm /tmp/get-pip.py
+#     fi
+# }
 
 
 # Ubuntu / Debian
@@ -65,7 +65,7 @@ do_apt() {
     base="msttcorefonts vim build-essential ubuntu-restricted-extras sudo xclip"
     net="curl wget"
     files="tree rar unrar"
-    dev="git mercurial colordiff libreadline-dev libncurses*-dev python-dev python3-dev build-essential ack-grep libffi-dev libssl-dev libreadline-dev"
+    dev="git mercurial colordiff libreadline-dev libncurses*-dev python-dev python3-dev build-essential ack-grep libffi-dev libssl-dev libreadline-dev python-pip python3-pip"
     media="vlc ffmpeg"
     sys="openssh-server screen htop virtualbox xawtv indicator-cpufreq"
     ppa="google-chrome-stable skype"
@@ -89,8 +89,8 @@ do_pkg() {
 
 
 main() {
-    # install pip and fuck
-    install_pip
+    # install fuck
+    # install_pip
     python -m pip install --upgrade thefuck
 
     # install all the rest

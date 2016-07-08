@@ -6,6 +6,7 @@
 	"installed_packages":
 	[
 		"Anaconda",
+		"BufferScroll",
 		"Find++",
 		"Git",
 		"JsFormat",
