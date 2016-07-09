@@ -8,32 +8,37 @@
 
 """
 Recursively search a string occurrence in all files of this directory.
-Very similar to "ack" command, just simpler. Features:
-- simple search
-- case insensitive search
-- search & replace
-- logical AND search for multiple patterns on the same line
-- colors
+Very similar to "ack" command, just simpler.
+Features:
+ * simple search
+ * case insensitive search
+ * search & replacelp
+ * logical AND search for multiple patterns on the same line
+ * colors
+ * open in system editor
 
 Usage:
-    grep.py [-e <exts>] [-r] [-i] [-n <lines>] [<pattern> ...]
+    grep.py [-r] [-i] [-o] [-n <N>] [-e <EXTS>] <pattern> ...
 
 Options:
     -r --replace              # replace 2 patterns
     -i --ignore-case          # case insensitive
-    -e <exts> --exts=<exts>   # a list of extensions defult=%s
-    -n <lines> --nlines=<lines>  # number of lines to print above and below
+    -e <EXTS> --exts=<EXTS>   # a list of comma separated extensions default=%s
+    -o --open                 # open files in editor
+    -n <N> --nlines=<N>       # number of lines to print above and below
 
 Examples:
     grep.py -e py,c,h pattern  # search for specific extensions
     grep.py foo bar            # search for 'foo' AND 'bar' on the same line
     grep.py -r foo bar         # replaces 'foo' with 'bar'
     grep.py foo -n 5           # prints the 5 lines before and after the match
+    grep.py foo -o             # open matching files in system editor
 """
 
 from __future__ import print_function
 import collections
 import os
+import subprocess
 import sys
 
 from docopt import docopt
@@ -42,6 +47,7 @@ from docopt import docopt
 PY3 = sys.version_info[0] == 3
 if PY3:
     basestring = str
+    raw_input = input
 TERMINAL_SIZE_FALLBACK = 2
 DEFAULT_EXTS = [
     'c',
@@ -69,6 +75,58 @@ __doc__ = __doc__ % str(tuple(DEFAULT_EXTS))
 # ===================================================================
 # utils
 # ===================================================================
+
+
+try:
+    from shutil import which
+except ImportError:
+    def which(cmd, mode=os.F_OK | os.X_OK, path=None):
+        """Given a command, mode, and a PATH string, return the path which
+        conforms to the given mode on the PATH, or None if there is no such
+        file.
+
+        `mode` defults to os.F_OK | os.X_OK. `path` defults to the result
+        of os.environ.get("PATH"), or can be overridden with a custom search
+        path.
+        """
+        def _access_check(fn, mode):
+            return (os.path.exists(fn) and os.access(fn, mode) and
+                    not os.path.isdir(fn))
+
+        if os.path.dirname(cmd):
+            if _access_check(cmd, mode):
+                return cmd
+            return None
+
+        if path is None:
+            path = os.environ.get("PATH", os.defpath)
+        if not path:
+            return None
+        path = path.split(os.pathsep)
+
+        if sys.platform == "win32":
+            if os.curdir not in path:
+                path.insert(0, os.curdir)
+
+            pathext = os.environ.get("PATHEXT", "").split(os.pathsep)
+            if any(cmd.lower().endswith(ext.lower()) for ext in pathext):
+                files = [cmd]
+            else:
+                files = [cmd + ext for ext in pathext]
+        else:
+            files = [cmd]
+
+        seen = set()
+        for dir in path:
+            normdir = os.path.normcase(dir)
+            if normdir not in seen:
+                seen.add(normdir)
+                for thefile in files:
+                    name = os.path.join(dir, thefile)
+                    if _access_check(name, mode):
+                        return name
+        return None
+
 
 def get_terminal_size():
     try:
@@ -106,7 +164,25 @@ def memoize(f):
 
 
 @memoize
-def _term_supports_colors(file=sys.stdout):
+def get_editor_cmd():
+    # always give precedence to sublime (sorry!)
+    if which("subl"):
+        return ["subl"]
+    else:
+        default = os.getenv("EDITOR")
+        if default:
+            return [default]
+        else:
+            if which("vim"):
+                return ["vim"]
+            elif which("vi"):
+                return ["vi"]
+            else:
+                sys.exit("no editor found")
+
+
+@memoize
+def term_supports_colors(file=sys.stdout):
     try:
         import curses
         assert file.isatty()
@@ -120,7 +196,7 @@ def _term_supports_colors(file=sys.stdout):
 
 def hilite(s, ok=True, bold=False):
     """Return an highlighted version of 'string'."""
-    if not _term_supports_colors():
+    if not term_supports_colors():
         return s
     attr = []
     if ok is None:  # no color
@@ -137,6 +213,11 @@ def hilite(s, ok=True, bold=False):
 def exit(msg):
     print(hilite(msg, ok=False), file=sys.stderr)
     sys.exit(1)
+
+
+def open_file(path):
+    cmd = get_editor_cmd()
+    subprocess.call(cmd + [path])
 
 
 # ===================================================================
@@ -287,9 +368,10 @@ def main(argv=None):
     start_ext = exts == set(['.*'])
 
     # Run.
-    files_matching = 0
+    files_matching = []
     occurrences = 0
     exts_map = collections.defaultdict(int)
+
     for root, dirs, files in os.walk('.', topdown=False):
         parent_root = os.path.normpath(root).split('/')[0]
         if parent_root in IGNORE_ROOT_DIRS and os.path.isdir(parent_root):
@@ -306,10 +388,11 @@ def main(argv=None):
             ocs = grep_file(
                 filepath, patterns,
                 replace=replace, ignore_case=ignore_case, nlines=nlines)
+
             occurrences += ocs
             if ocs:
-                files_matching += 1
                 exts_map[ext] += 1
+                files_matching.append(filepath)
 
     if occurrences:
         # Print final stats.
@@ -319,10 +402,32 @@ def main(argv=None):
 
         print("occurrences=%s, files-matching=%s, exts=(%s)" % (
             hilite(occurrences, bold=True),
-            hilite(files_matching, bold=True),
+            hilite(len(files_matching), bold=True),
             ','.join(exts_stats),
         ))
 
+        if args['--open']:
+            if len(files_matching) == 1:
+                open_file(files_matching.pop())
+            else:
+                for i, file in enumerate(files_matching, 1):
+                    print("%s: %s" % (
+                        hilite(str(i), ok=None, bold=True), file))
+                while True:
+                    try:
+                        sel = int(raw_input('open file (* for all): '))
+                        break
+                    except ValueError:
+                        continue
+                if sel == '*':
+                    for file in files_matching:
+                        open_file(file)
+                else:
+                    open_file(files_matching[int(sel) - 1])
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print()
+        sys.exit(1)
