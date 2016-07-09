@@ -414,11 +414,9 @@ def main(argv=None):
                     print("%s: %s" % (
                         hilite(str(i), ok=None, bold=True), file))
                 while True:
-                    try:
-                        sel = int(raw_input('open file (* for all): '))
+                    sel = raw_input('open file (* for all): ')
+                    if sel.isdigit() or sel == '*':
                         break
-                    except ValueError:
-                        continue
                 if sel == '*':
                     for file in files_matching:
                         open_file(file)
