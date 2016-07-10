@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import os
-from os.path import exists, join, normpath, dirname, dirname, isfile, isdir
-from os.path import realpath
+from os.path import exists, join, normpath, dirname, isfile, isdir
 
+from sysconf import BSD
 from sysconf import cwd
 from sysconf import DIR_HOME
 from sysconf import DIR_STATIC_HOME
@@ -72,5 +72,9 @@ def main():
         sh("git config --global push.default simple")
     else:
         logerr('git', 'git not installed')
+
+    if BSD:
+        logtitle("set bash as default shell")
+        sh("chsh -s /usr/local/bin/bash")
 
 main()

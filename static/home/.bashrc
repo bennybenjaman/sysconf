@@ -86,10 +86,12 @@ fi
 
 # http://stackoverflow.com/a/5130969/376587
 # "ls | c" copies the output, "v" paste it in the terminal
-if [[ $PLATFORM == *linux* ]]; then
+# xclip is available at least on Linux and FreeBSD
+if type -P xclip > /dev/null; then
     alias "c=xclip -selection clipboard"
     alias "v=xclip -o"
 fi
+
 
 # ===========================================================================
 # Custom settings
