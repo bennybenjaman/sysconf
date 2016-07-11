@@ -25,7 +25,7 @@ Installation
 ============
 
 ```
-git clone git@github.com:giampaolo/sysconfig.git
+git clone git@github.com:giampaolo/sysconf.git
 cd sysconfig
 make install
 ```

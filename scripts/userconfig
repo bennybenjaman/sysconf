@@ -73,8 +73,13 @@ def main():
     else:
         logerr('git', 'git not installed')
 
+    # BSD
     if BSD:
         logtitle("set bash as default shell")
         sh("chsh -s /usr/local/bin/bash")
+
+    # SSH
+    if os.path.isfile("~/.ssh/id_rsa"):
+        sh("chmod 600 ~/.ssh/id_rsa")
 
 main()
