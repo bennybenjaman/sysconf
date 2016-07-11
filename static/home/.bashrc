@@ -533,8 +533,7 @@ sh-net-scp-ssh-keys() {
         echo "usage: ssh-add-remote-keys <user> <remote-ip> "
         return
     fi
-    cat ~/.ssh/id_rsa.pub | ssh $1@$2 "cat - >> ~/.ssh/authorized_keys"
-    echo "done"
+    scp ~/.ssh/* $1@$2:~/.ssh/
 }
 
 
