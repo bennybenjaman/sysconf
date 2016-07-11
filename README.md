@@ -6,7 +6,23 @@ utilities to install on a brand new UNIX system. This basically does 3 things:
 * configure system files (e.g. add user to sudoers)
 * symnlink user config files to this cloned repository (e.g. [.bashrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.bashrc), [.vimrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.vimrc), [.gitconfig](https://github.com/giampaolo/sysconf/blob/master/static/home/.gitconfig))
 
-Install it with:
+Pre installation
+================
+
+**FreeBSD**
+
+```
+pkg install python bash git
+```
+
+**If GIT is not installed**
+
+```
+wget https://github.com/giampaolo/sysconf/tarball/master && tar zxvf master
+```
+
+Installation
+============
 
 ```
 git clone git@github.com:giampaolo/sysconfig.git

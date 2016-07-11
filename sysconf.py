@@ -283,6 +283,7 @@ def safe_makedirs(path, mode=None):
 def safe_rmtree(path):
     "Same as shutil.rmtree but doesn't raise exception if path does not exist"
     log("rmtree", path)
+
     def onerror(fun, path, excinfo):
         exc = excinfo[1]
         if exc.errno != errno.ENOENT:

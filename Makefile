@@ -36,7 +36,7 @@ install:
 				code = os.system('%s %s --user' % (sys.executable, f.name)); \
 				sys.exit(code);"
 	# Install setuptools (required 'cause we want 'develop' / 'edit' mode).
-	$(PYTHON) -m pip install --user --upgrade setuptools
+	$(PYTHON) -m pip install --user --upgrade setuptools docopt
 	# Finally install this pkg.
 	$(PYTHON) setup.py develop --user
 

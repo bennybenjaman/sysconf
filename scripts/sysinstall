@@ -12,32 +12,32 @@ fi
 
 # ...in case wget/curl are missing
 # usage: sh_net_httpfetch <url> [<file>]
-sh_net_httpfetch() {
-    url=$1 dest=$2 python << END
-from __future__ import print_function
-if 1:
-    import os, urllib2, sys
-    url = os.environ['url']
-    dest = os.environ['dest']
-    if not url:
-        sys.exit('usage: sh_net_httpfetch <url> [<file>]')
-    print("getting %s to %s" % (url, dest), file=sys.stderr)
-    if not '://' in url:
-        url = 'http://' + url
-    # try to disable cache
-    req = urllib2.Request(url)
-    req.add_header('Cache-Control', 'max-age=0')
-    req.add_header('Pragma', 'no-cache')
-    url = urllib2.urlopen(req)
-    data = url.read()
-    if dest:
-        f = open(dest, 'w')
-    else:
-        f = sys.stdout
-    with f:
-        f.write(data)
-END
-}
+# sh_net_httpfetch() {
+#     url=$1 dest=$2 python << END
+# from __future__ import print_function
+# if 1:
+#     import os, urllib2, sys
+#     url = os.environ['url']
+#     dest = os.environ['dest']
+#     if not url:
+#         sys.exit('usage: sh_net_httpfetch <url> [<file>]')
+#     print("getting %s to %s" % (url, dest), file=sys.stderr)
+#     if not '://' in url:
+#         url = 'http://' + url
+#     # try to disable cache
+#     req = urllib2.Request(url)
+#     req.add_header('Cache-Control', 'max-age=0')
+#     req.add_header('Pragma', 'no-cache')
+#     url = urllib2.urlopen(req)
+#     data = url.read()
+#     if dest:
+#         f = open(dest, 'w')
+#     else:
+#         f = sys.stdout
+#     with f:
+#         f.write(data)
+# END
+# }
 
 
 # install_pip() {
@@ -76,15 +76,9 @@ do_apt() {
 }
 
 
-# FreeBSD (tipically)
+# FreeBSD (typically)
 do_pkg() {
-    # install sudo
-    if type -P sudo > /dev/null; then
-        cd /usr/ports/security/sudo/ && make install clean
-    fi
-
-    # install base packages
-    pkg install -y git vim screen gcc wget curl
+    pkg install -y git vim screen gcc wget curl sudo python python3 wget curl tree xclip
 }
 
 
