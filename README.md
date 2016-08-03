@@ -22,6 +22,13 @@ wget https://github.com/giampaolo/sysconf/tarball/master && tar zxvf master
 eval $(ssh-agent)  # do not prompt password on GIT push
 ```
 
+**Solaris**
+
+```
+pkg install python git gcc
+```
+
+
 Installation
 ============
 

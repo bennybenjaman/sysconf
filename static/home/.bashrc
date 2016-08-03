@@ -712,6 +712,33 @@ sh-subl-rm-session() {
 
 
 # ===========================================================================
+# Github
+# ===========================================================================
+
+
+# Get the base github url of this GIT project.
+_sh_github_print_prj_url() {
+    git remote -v | awk '/fetch/{print $2}' | sed -re 's#(git@|git://)#https://#' -e '   s@com:@com/@' | head -n1 | sed "s/....$//"
+
+}
+
+# Open the browser to the main github page of this GIT project.
+sh-github-prj-url() {
+    url=`_sh_github_print_prj_url`
+    echo $url | xargs google-chrome
+}
+
+# Open the browser to the github page which shows the diff between this
+# GIT branch and master, e.g.:
+# https://github.com/giampaolo/psutil/compare/master...oneshot#files_bucket
+sh-github-diff-branch() {
+    base_url=`_sh_github_print_prj_url`
+    branch_name=`git rev-parse --abbrev-ref HEAD`
+    url="$base_url/compare/master...$branch_name#files_bucket"
+    echo $url | xargs google-chrome
+}
+
+# ===========================================================================
 # Internal utils
 # ===========================================================================
 
