@@ -722,11 +722,6 @@ _sh_github_print_prj_url() {
 
 }
 
-# Open the browser to the main github page of this GIT project.
-sh-github-prj-url() {
-    url=`_sh_github_print_prj_url`
-    echo $url | xargs google-chrome
-}
 
 # Open the browser to the github page which shows the diff between this
 # GIT branch and master, e.g.:
