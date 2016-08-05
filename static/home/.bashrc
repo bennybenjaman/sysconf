@@ -546,7 +546,7 @@ sh-net-scp-ssh-keys() {
 # install package
 sh-pkg-install() {
     if [ -z "$1" ]; then
-        echo "usage: sh-pkg-install <pkg-name> "
+        echo "usage: sh-pkg-ins https://github.com/giampaolo/psutil.gittall <pkg-name> "
         return
     fi
     # TODO: better handling of auth (sudo)
@@ -556,7 +556,7 @@ sh-pkg-install() {
     # osx
     elif type -P brew > /dev/null; then
         sudo brew install $1
-    # freebsd
+    # solaris
     elif type -P pkg > /dev/null; then
         pkg install $1
     # freebsd
@@ -732,6 +732,7 @@ sh-github-diff-branch() {
     url="$base_url/compare/master...$branch_name#files_bucket"
     echo $url | xargs google-chrome
 }
+
 
 # ===========================================================================
 # Internal utils

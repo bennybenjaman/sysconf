@@ -76,23 +76,41 @@ do_apt() {
 }
 
 
-# FreeBSD (typically)
+# FreeBSD os Solaris
 do_pkg() {
-    pkg install -y git vim screen gcc wget curl sudo python python3 wget curl tree xclip
+    # FreeBSD
+    if echo "$OSTYPE" | grep 'freebsd'; then
+        pkg install -y git vim screen gcc wget curl sudo python python3 wget curl tree xclip
+    fi
+
+    # Solaris
+    if echo "$OSTYPE" | grep 'solaris'; then
+        # distutils assume cc; if not installed use gcc by creating a symlink
+        if ! type -P cc > /dev/null; then
+            ln -s /usr//bin/gcc /usr/local/bin/cc
+        fi
+
+        # install pkgs
+        if ! type -P gcc > /dev/null; then
+            pkg install gcc
+        fi
+        if ! type -P vim > /dev/null; then
+            pkg install vim
+        fi
+    fi
 }
 
 
 main() {
-    # install fuck
-    # install_pip
-    python -m pip install --upgrade thefuck
-
-    # install all the rest
+    # install pkgs
     if type -P apt > /dev/null; then
         do_apt
     elif type -P pkg > /dev/null; then
         do_pkg
     fi
+
+    # install python stuff
+    python -m pip install --upgrade thefuck pip
 }
 
 main
