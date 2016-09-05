@@ -7,23 +7,39 @@
 Print statistics about a code project.
 
 Usage:
-    codestats.py
+    codestats.py [-d]
+
+Options:
+    -d --debug         # print debug output
 """
 
+from __future__ import print_function, division
 import collections
 import os
 import subprocess
 import string
+import sys
 
 from docopt import docopt  # requires 'pip install docopt'
 
 
 KNOWN_SRC_EXTS = {'.py', '.html', '.css', '.c', '.h', 'cpp'}
 KNOWN_BIN_EXTS = {'.pyc', '.pyo', '.pyd', '.so', '.png', '.jpg'}
+KNOWN_BASENAMES = {'README', 'Makefile'}
+DEBUG = False
 
 
 def sh(cmd):
     return subprocess.check_output(cmd, shell=True).strip()
+
+
+def log(msg):
+    print(msg)
+
+
+def logdebug(msg):
+    if DEBUG:
+        print(msg, file=sys.stderr)
 
 
 def get_src_files():
@@ -67,44 +83,54 @@ def get_file_ext(file):
     if ext:
         return ext
     else:
+        # guess by file name
+        name = os.path.basename(file)
+        if name in KNOWN_BASENAMES:
+            return name
+        # guess by shebang
         with open(file, 'rt') as f:
             while True:
-                line = f.readline()
-                line = line.strip()
-                if not line:
-                    continue
-                if not line.startswith('#'):
-                    return '?'
-
-                if line.startswith('#!/usr/bin/env python'):
-                    return '.py'
-                elif 'bash' in line or 'sh' in line:
-                    return '.sh'
-                else:
-                    return '?'
+                firstline = f.readline().strip()
+                if firstline:
+                    break
+            if not firstline.startswith('#'):
+                return '?'
+            if firstline.startswith('#!/usr/bin/env python'):
+                return '.py'
+            if 'bash' in firstline or 'sh' in firstline:
+                return '.sh'
+            logdebug("can't recognize file %r" % file)
+            return '?'
 
 
 def main():
+    # setup
+    global DEBUG
     args = docopt(__doc__)
+    DEBUG = args['--debug']
     stats = collections.defaultdict(int)
     files = get_src_files()
+
+    # collect stats
     for file in files:
         if not istext(file):
             continue
         ext = get_file_ext(file)
         stats[ext] += get_no_lines(file)
 
+    # calculate percent
     percent = {}
     tot_lines = sum(stats.values())
     for ext, lines in stats.items():
-        percent[ext] = round(float(lines) / tot_lines * 100, 1)
+        percent[ext] = round(lines / tot_lines * 100, 1)
 
-    pairs = sorted(stats.iteritems(), key=lambda (k, v): v, reverse=True)
+    # print stats
     print("-" * 34)
     print("ext                 lines        %")
     print("-" * 34)
+    pairs = sorted(stats.items(), key=lambda (k, v): v, reverse=True)
     for ext, lines in pairs:
-        print("%-18s %6s %7s%%" % (ext[1:], lines, percent[ext]))
+        print("%-18s %6s %7s%%" % (ext, lines, percent[ext]))
     print("-" * 34)
     print("lines:        %20s" % tot_lines)
     print("files:        %20s" % len(files))
