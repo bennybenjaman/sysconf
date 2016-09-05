@@ -7,7 +7,7 @@
 Print statistics about a code project.
 
 Usage:
-    codestats.py [-d]
+    codestats.py [-d] [<dir>]
 
 Options:
     -d --debug         # print debug output
@@ -114,6 +114,10 @@ def log(msg):
 def logdebug(msg):
     if DEBUG:
         print(msg, file=sys.stderr)
+
+
+def is_git():
+    return os.path.isdir(os.path.join(DIRECTORY, '.git'))
 
 
 def warn(msg):
@@ -231,8 +235,11 @@ def get_file_ext(file):
 def main():
     # setup
     global DEBUG
+    global DIRECTORY
 
     args = docopt(__doc__)
+    DIRECTORY = args['<dir>'] or ''
+    DIRECTORY = DIRECTORY.rstrip('/')
     DEBUG = args['--debug']
     stats = collections.defaultdict(int)
     files = get_src_files()
@@ -260,12 +267,13 @@ def main():
     print("-" * 34)
     print("lines:        %20s" % tot_lines)
     print("files:        %20s" % len(files))
-    print("commits:      %20s" % sh("git rev-list --all --count"))
-    committers = sh("git shortlog -sn")
-    print("committers:   %20s" % len(committers.split('\n')))
-    first_cset = sh("git rev-list --max-parents=0 HEAD")
-    first_commit = sh(r"git show -s --format=%ar " + first_cset)
-    print("first commit  %20s" % first_commit)
+    if is_git():
+        print("commits:      %20s" % sh("git rev-list --all --count"))
+        committers = sh("git shortlog -sn")
+        print("committers:   %20s" % len(committers.split('\n')))
+        first_cset = sh("git rev-list --max-parents=0 HEAD")
+        first_commit = sh(r"git show -s --format=%ar " + first_cset)
+        print("first commit  %20s" % first_commit)
 
 
 main()
