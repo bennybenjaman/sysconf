@@ -72,13 +72,36 @@ BIN_EXTS = set([
     "xla", "xlam", "xls", "xlsb", "xlsm", "xlsx", "xlt", "xltm", "xltx", "xm",
     "xmind", "xpi", "xpm", "xwd", "xz", "z", "zip", "zipx",
 ])
-KNOWN_BASENAMES = set(['README', 'Makefile'])
+KNOWN_BASENAMES = set([
+    'README', 'Makefile', '.gitignore'
+])
+SHEBANGS = {
+    '#!/bin/bash': '.bash',
+    '#!/bin/csh -f': '.csh',
+    '#!/bin/csh': '.csh',
+    '#!/bin/sh': '.sh',
+    '#!/usr/bin/env bash': '.bash',
+    '#!/usr/bin/env jsc': '.js',
+    '#!/usr/bin/env lua': '.lua',
+    '#!/usr/bin/env node': '.js',
+    '#!/usr/bin/env perl': '.pl',
+    '#!/usr/bin/env php': '.php',
+    '#!/usr/bin/env python': '.py',
+    '#!/usr/bin/env python3': '.py',
+    '#!/usr/bin/env rhino': '.js',
+    '#!/usr/bin/env ruby': '.rb',
+    '#!/usr/bin/lua': '.lua',
+    '#!/usr/bin/perl': '.pl',
+    '#!/usr/bin/php': '.php',
+    '#!/usr/bin/ruby': '.rb',
+}
 DEBUG = False
 
 
 # ===================================================================
 # utils
 # ===================================================================
+
 
 def sh(cmd):
     return subprocess.check_output(cmd, shell=True).strip()
@@ -91,6 +114,10 @@ def log(msg):
 def logdebug(msg):
     if DEBUG:
         print(msg, file=sys.stderr)
+
+
+def warn(msg):
+    print(hilite(msg, color='orange'), file=sys.stderr)
 
 
 def memoize(f):
@@ -119,19 +146,19 @@ def term_supports_colors(file=sys.stdout):
         return True
 
 
-def hilite(s, ok=True, bold=False):
+def hilite(s, color):
     """Return an highlighted version of 'string'."""
     if not term_supports_colors():
         return s
     attr = []
-    if ok is None:  # no color
-        pass
-    elif ok:   # green
-        attr.append('32')
-    else:   # red
+    if color == 'red':
         attr.append('31')
-    if bold:
-        attr.append('1')
+    elif color == 'green':
+        attr.append('32')
+    elif color == 'orange':
+        attr.append('33')
+    else:
+        raise ValueError(color)
     return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
 
 
@@ -188,29 +215,30 @@ def get_file_ext(file):
         # guess by shebang
         with open(file, 'rt') as f:
             while True:
-                firstline = f.readline().strip()
+                firstline = f.readline()
+                if not firstline:
+                    break
+                firstline = firstline.strip()
                 if firstline:
                     break
-            if not firstline.startswith('#'):
-                return '?'
-            if firstline.startswith('#!/usr/bin/env python'):
-                return '.py'
-            if 'bash' in firstline or 'sh' in firstline:
-                return '.sh'
-            logdebug("can't recognize file %r" % file)
-            return '?'
+            try:
+                return SHEBANGS[firstline]
+            except KeyError:
+                warn("can't recognize file %r" % file)
+                return '(no-extension)'
 
 
 def main():
     # setup
     global DEBUG
+
     args = docopt(__doc__)
     DEBUG = args['--debug']
     stats = collections.defaultdict(int)
     files = get_src_files()
 
     # collect stats
-    for file in files:
+    for i, file in enumerate(files):
         if not istext(file):
             continue
         ext = get_file_ext(file)
