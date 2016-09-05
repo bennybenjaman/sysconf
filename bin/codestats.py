@@ -23,11 +23,62 @@ import sys
 from docopt import docopt  # requires 'pip install docopt'
 
 
-KNOWN_SRC_EXTS = {'.py', '.html', '.css', '.c', '.h', 'cpp'}
-KNOWN_BIN_EXTS = {'.pyc', '.pyo', '.pyd', '.so', '.png', '.jpg'}
-KNOWN_BASENAMES = {'README', 'Makefile'}
+# https://github.com/sindresorhus/text-extensions/
+SRC_EXTS = set([
+    "applescript", "asp", "aspx", "atom", "bashrc", "bat", "bbcolors",
+    "bowerrc", "c", "cc", "cfc", "cfg", "cfm", "cmd", "cnf", "coffee", "conf",
+    "cpp", "cson", "css", "csslintrc", "csv", "curlrc", "cxx", "diff", "eco",
+    "editorconfig", "ejs", "emacs", "eml", "erb", "erl", "eslintignore",
+    "eslintrc", "gemrc", "gitattributes", "gitconfig", "gitignore", "go",
+    "gvimrc", "h", "haml", "hbs", "hgignore", "hpp", "htaccess", "htm", "html",
+    "iced", "ini", "ino", "irbrc", "itermcolors", "jade", "js", "jscsrc",
+    "jshintignore", "jshintrc", "json", "jsonld", "jsx", "less", "ls", "log",
+    "m", "markdown", "md", "mdown", "mdwn", "mht", "mhtml", "mkd", "mkdn",
+    "mkdown", "nfo", "npmrc", "npmignore", "nvmrc", "patch", "pbxproj", "pch",
+    "php", "phtml", "pl", "pm", "properties", "py", "rb", "rdoc",
+    "rdoc_options", "ron", "rss", "rst", "rtf", "rvmrc", "sass", "scala",
+    "scss", "seestyle", "sls", "sss", "sh", "strings", "styl", "stylus",
+    "sub", "sublime-build", "sublime-commands", "sublime-completions",
+    "sublime-keymap", "sublime-macro", "sublime-menu", "sublime-project",
+    "sublime-settings", "sublime-workspace", "svg", "sql", "terminal",
+    "text", "textile", "tmLanguage", "tmTheme", "tsv", "txt", "vbs",
+    "vim", "viminfo", "vimrc", "webapp", "xht", "xhtml", "xml", "xsl", "yaml",
+    "yml", "zsh", "zshrc",
+])
+# https://github.com/sindresorhus/binary-extensions
+BIN_EXTS = set([
+    "3ds", "3g2", "3gp", "7z", "a", "aac", "adp", "ai", "aif", "aiff", "alz",
+    "ape", "apk", "ar", "arj", "asf", "au", "avi", "bak", "bh", "bin", "bk",
+    "bmp", "btif", "bz2", "bzip2", "cab", "caf", "cgm", "class", "cmx", "cpio",
+    "cr2", "csv", "cur", "dat", "deb", "dex", "djvu", "dll", "dmg", "dng",
+    "doc", "docm", "docx", "dot", "dotm", "dra", "DS_Store", "dsk", "dts",
+    "dtshd", "dvb", "dwg", "dxf", "ecelp4800", "ecelp7470", "ecelp9600", "egg",
+    "eol", "eot", "epub", "exe", "f4v", "fbs", "fh", "fla", "flac", "fli",
+    "flv", "fpx", "fst", "fvt", "g3", "gif", "graffle", "gz", "gzip", "h261",
+    "h263", "h264", "ico", "ief", "img", "ipa", "iso", "jar", "jpeg", "jpg",
+    "jpgv", "jpm", "jxr", "key", "ktx", "lha", "lvp", "lz", "lzh", "lzma",
+    "lzo", "m3u", "m4a", "m4v", "mar", "mdi", "mht", "mid", "midi", "mj2",
+    "mka", "mkv", "mmr", "mng", "mobi", "mov", "movie", "mp3", "mp4", "mp4a",
+    "mpeg", "mpg", "mpga", "mxu", "nef", "npx", "numbers", "o", "oga", "ogg",
+    "ogv", "otf", "pages", "pbm", "pcx", "pdf", "pea", "pgm", "pic", "png",
+    "pnm", "pot", "potm", "potx", "ppa", "ppam", "ppm", "pps", "ppsm", "ppsx",
+    "ppt", "pptm", "pptx", "psd", "pya", "pyc", "pyo", "pyv", "qt", "rar",
+    "ras", "raw", "rgb", "rlc", "rmf", "rmvb", "rtf", "rz", "s3m", "s7z",
+    "scpt", "sgi", "shar", "sil", "slk", "smv", "so", "sub", "swf", "tar",
+    "tbz", "tbz2", "tga", "tgz", "thmx", "tif", "tiff", "tlz", "ts", "ttc",
+    "ttf", "txz", "udf", "uvh", "uvi", "uvm", "uvp", "uvs", "uvu", "viv",
+    "vob", "war", "wav", "wax", "wbmp", "wdp", "weba", "webm", "webp", "whl",
+    "wim", "wm", "wma", "wmv", "wmx", "woff", "woff2", "wvx", "xbm", "xif",
+    "xla", "xlam", "xls", "xlsb", "xlsm", "xlsx", "xlt", "xltm", "xltx", "xm",
+    "xmind", "xpi", "xpm", "xwd", "xz", "z", "zip", "zipx",
+])
+KNOWN_BASENAMES = set(['README', 'Makefile'])
 DEBUG = False
 
+
+# ===================================================================
+# utils
+# ===================================================================
 
 def sh(cmd):
     return subprocess.check_output(cmd, shell=True).strip()
@@ -42,6 +93,53 @@ def logdebug(msg):
         print(msg, file=sys.stderr)
 
 
+def memoize(f):
+    """Memoize function or method return values, saving time if
+    method has already been called with that same argument.
+    """
+    cache = {}
+
+    def memf(*x):
+        if x not in cache:
+            cache[x] = f(*x)
+        return cache[x]
+    return memf
+
+
+@memoize
+def term_supports_colors(file=sys.stdout):
+    try:
+        import curses
+        assert file.isatty()
+        curses.setupterm()
+        assert curses.tigetnum("colors") > 0
+    except Exception:
+        return False
+    else:
+        return True
+
+
+def hilite(s, ok=True, bold=False):
+    """Return an highlighted version of 'string'."""
+    if not term_supports_colors():
+        return s
+    attr = []
+    if ok is None:  # no color
+        pass
+    elif ok:   # green
+        attr.append('32')
+    else:   # red
+        attr.append('31')
+    if bold:
+        attr.append('1')
+    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
+
+
+# ===================================================================
+# implementation
+# ===================================================================
+
+
 def get_src_files():
     out = subprocess.check_output("git ls-files", shell=True)
     return [x for x in out.split(b'\n') if x]
@@ -54,9 +152,9 @@ def get_no_lines(file):
 
 def istext(file):
     ext = os.path.splitext(file)[1]
-    if ext in KNOWN_SRC_EXTS:
+    if ext in SRC_EXTS:
         return True
-    if ext in KNOWN_BIN_EXTS:
+    if ext in BIN_EXTS:
         return False
 
     s = open(file).read(512)
