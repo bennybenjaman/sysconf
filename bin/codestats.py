@@ -15,9 +15,10 @@ Options:
 
 from __future__ import print_function, division
 import collections
+import contextlib
 import os
-import subprocess
 import string
+import subprocess
 import sys
 
 from docopt import docopt  # requires 'pip install docopt'
@@ -166,14 +167,36 @@ def hilite(s, color):
     return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
 
 
+@contextlib.contextmanager
+def cwd(path):
+    init = os.getcwd()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(init)
+
+
 # ===================================================================
 # implementation
 # ===================================================================
 
 
 def get_src_files():
-    out = subprocess.check_output("git ls-files", shell=True)
-    return [x for x in out.split(b'\n') if x]
+    if is_git():
+        out = sh("git ls-files")
+        return [x for x in out.split(b'\n') if x]
+    else:
+        ls = []
+        with cwd(DIRECTORY):
+            for root, subdirs, subfiles in os.walk('.'):
+                root = os.path.normpath(root)
+                if root.split('/')[0] in {'.git', '.svn', '.hg'}:
+                    continue
+                for file in subfiles:
+                    file = os.path.join(root, file)
+                    ls.append(file)
+        return ls
 
 
 def get_no_lines(file):
@@ -238,7 +261,7 @@ def main():
     global DIRECTORY
 
     args = docopt(__doc__)
-    DIRECTORY = args['<dir>'] or ''
+    DIRECTORY = args['<dir>'] or os.getcwd()
     DIRECTORY = DIRECTORY.rstrip('/')
     DEBUG = args['--debug']
     stats = collections.defaultdict(int)
@@ -271,9 +294,13 @@ def main():
         print("commits:      %20s" % sh("git rev-list --all --count"))
         committers = sh("git shortlog -sn")
         print("committers:   %20s" % len(committers.split('\n')))
+        print("top 5 committers: ")
+        for line in committers.split('\n')[:5]:
+            commits, author = line.strip().split('\t')
+            print("  %-20s %11s" % (author, commits))
         first_cset = sh("git rev-list --max-parents=0 HEAD")
         first_commit = sh(r"git show -s --format=%ar " + first_cset)
-        print("first commit  %20s" % first_commit)
+        print("first commit:  %19s" % first_commit)
 
 
 main()
