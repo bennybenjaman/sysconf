@@ -254,14 +254,18 @@ def main():
     print("-" * 34)
     print("ext                 lines        %")
     print("-" * 34)
-    pairs = sorted(stats.items(), key=lambda (k, v): v, reverse=True)
+    pairs = sorted(stats.items(), key=lambda (k, v): v)
     for ext, lines in pairs:
         print("%-18s %6s %7s%%" % (ext, lines, percent[ext]))
     print("-" * 34)
     print("lines:        %20s" % tot_lines)
     print("files:        %20s" % len(files))
     print("commits:      %20s" % sh("git rev-list --all --count"))
-    print("committers:   %20s" % len(sh("git shortlog -sn").split('\n')))
+    committers = sh("git shortlog -sn")
+    print("committers:   %20s" % len(committers.split('\n')))
+    first_cset = sh("git rev-list --max-parents=0 HEAD")
+    first_commit = sh(r"git show -s --format=%ar " + first_cset)
+    print("first commit  %20s" % first_commit)
 
 
 main()
