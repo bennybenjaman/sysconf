@@ -7,7 +7,7 @@
 Print statistics about a code project.
 
 Usage:
-    codestats.py [-d] [<dir>]
+    codestats.py [-d]
 
 Options:
     -d --debug         # print debug output
@@ -118,7 +118,7 @@ def logdebug(msg):
 
 
 def is_git():
-    return os.path.isdir(os.path.join(DIRECTORY, '.git'))
+    return os.path.isdir('.git')
 
 
 def warn(msg):
@@ -167,16 +167,6 @@ def hilite(s, color):
     return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
 
 
-@contextlib.contextmanager
-def cwd(path):
-    init = os.getcwd()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(init)
-
-
 # ===================================================================
 # implementation
 # ===================================================================
@@ -185,17 +175,16 @@ def cwd(path):
 def get_src_files():
     if is_git():
         out = sh("git ls-files")
-        return [x for x in out.split(b'\n') if x]
+        return [x for x in out.split(b'\n') if os.path.isfile(x)]
     else:
         ls = []
-        with cwd(DIRECTORY):
-            for root, subdirs, subfiles in os.walk('.'):
-                root = os.path.normpath(root)
-                if root.split('/')[0] in {'.git', '.svn', '.hg'}:
-                    continue
-                for file in subfiles:
-                    file = os.path.join(root, file)
-                    ls.append(file)
+        for root, subdirs, subfiles in os.walk('.'):
+            root = os.path.normpath(root)
+            if root.split('/')[0] in {'.git', '.svn', '.hg'}:
+                continue
+            for file in subfiles:
+                file = os.path.join(root, file)
+                ls.append(file)
         return ls
 
 
@@ -258,11 +247,8 @@ def get_file_ext(file):
 def main():
     # setup
     global DEBUG
-    global DIRECTORY
 
     args = docopt(__doc__)
-    DIRECTORY = args['<dir>'] or os.getcwd()
-    DIRECTORY = DIRECTORY.rstrip('/')
     DEBUG = args['--debug']
     stats = collections.defaultdict(int)
     files = get_src_files()
@@ -281,26 +267,26 @@ def main():
         percent[ext] = round(lines / tot_lines * 100, 1)
 
     # print stats
-    print("-" * 34)
-    print("ext                 lines        %")
-    print("-" * 34)
+    print("-" * 44)
+    print("ext                           lines        %")
+    print("-" * 44)
     pairs = sorted(stats.items(), key=lambda (k, v): v)
     for ext, lines in pairs:
-        print("%-18s %6s %7s%%" % (ext, lines, percent[ext]))
-    print("-" * 34)
-    print("lines:        %20s" % tot_lines)
-    print("files:        %20s" % len(files))
+        print("%-18s %16s %7s%%" % (ext, lines, percent[ext]))
+    print("-" * 44)
+    print("lines:        %30s" % tot_lines)
+    print("files:        %30s" % len(files))
     if is_git():
-        print("commits:      %20s" % sh("git rev-list --all --count"))
+        print("commits:      %30s" % sh("git rev-list --all --count"))
         committers = sh("git shortlog -sn")
-        print("committers:   %20s" % len(committers.split('\n')))
+        first_cset = sh("git rev-list --max-parents=0 HEAD")
+        first_commit = sh(r"git show -s --format=%ar " + first_cset)
+        print("first commit:  %29s" % first_commit)
+        print("committers:   %30s" % len(committers.split('\n')))
         print("top 5 committers: ")
         for line in committers.split('\n')[:5]:
             commits, author = line.strip().split('\t')
-            print("  %-20s %11s" % (author, commits))
-        first_cset = sh("git rev-list --max-parents=0 HEAD")
-        first_commit = sh(r"git show -s --format=%ar " + first_cset)
-        print("first commit:  %19s" % first_commit)
+            print("  %-30s %11s" % (author, commits))
 
 
 main()
