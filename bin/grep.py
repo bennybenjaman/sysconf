@@ -423,6 +423,7 @@ def main(argv=None):
                 else:
                     open_file(files_matching[int(sel) - 1])
 
+
 if __name__ == '__main__':
     try:
         main()

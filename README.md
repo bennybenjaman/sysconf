@@ -69,3 +69,5 @@ Interesting stand-alone parts which may be useful
   show code stats about a project.
 * [bin/killall.py](https://github.com/giampaolo/sysconf/blob/master/bin/killall.py):
   a clone of "killall" command but it tries harder to kill a process.
+* [bin/find_broken_links.py](https://github.com/giampaolo/sysconf/blob/master/bin/find_broken_links.py):
+  find broken links in text files

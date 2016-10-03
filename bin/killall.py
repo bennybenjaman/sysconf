@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2016 Giampaolo Rodola'. All rights reserved.
+# Use of this source code is governed by a BSD-style license.
+
 """
 Kill a process by name. Similar to 'killall' command, it just tries
 harder to kill the process by:
