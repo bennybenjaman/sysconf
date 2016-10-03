@@ -91,7 +91,12 @@ fi
 # ===================================================================
 
 # config sshd
-add_line_to_file /etc/ssh/sshd_config "PermitRootLogin yes"
+if [[ -f /etc/ssh/sshd_config ]]; then
+    add_line_to_file /etc/ssh/sshd_config "PermitRootLogin yes"
+elif [[ -f /etc/sshd_config ]]; then
+    # osx
+    add_line_to_file /etc/sshd_config "PermitRootLogin yes"
+fi
 
 # config sudo
 if type -P sudo > /dev/null; then
