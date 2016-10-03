@@ -15,7 +15,6 @@ Options:
 
 from __future__ import print_function, division
 import collections
-import contextlib
 import os
 import string
 import subprocess
