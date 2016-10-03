@@ -106,8 +106,9 @@ do_brew() {
     # install brew
     if ! type -P brew > /dev/null; then
         ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"
+        sudo chown root /usr/local/bin/brew
     fi
-    # brew install git vim
+    FORCE_UNSAFE_CONFIGURE=1 sudo brew install gcc git vim coreutils
 }
 
 
@@ -122,7 +123,7 @@ main() {
     fi
 
     # install python stuff
-    python -m pip install --upgrade thefuck pip
+    python -m pip install --upgrade thefuck pip setuptools
 }
 
 main

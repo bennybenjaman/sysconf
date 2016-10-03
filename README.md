@@ -36,7 +36,6 @@ eval $(ssh-agent)  # do not prompt password on GIT push
 pkg install python git gcc
 ```
 
-
 Installation
 ============
 
@@ -66,5 +65,7 @@ Interesting stand-alone parts which may be useful
 * [home/.pythonstart](https://github.com/giampaolo/sysconf/blob/master/static/home/.pythonstart): auto-completion for the interatctive interpreter
 * [bin/grep.py](https://github.com/giampaolo/sysconf/blob/master/bin/grep.py):
   a clone of "ack" command but simpler.
+* [bin/codestats.py](https://github.com/giampaolo/sysconf/blob/master/bin/codestats.py):
+  show code stats about a project.
 * [bin/killall.py](https://github.com/giampaolo/sysconf/blob/master/bin/killall.py):
   a clone of "killall" command but it tries harder to kill a process.
