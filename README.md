@@ -9,6 +9,14 @@ utilities to install on a brand new UNIX system. This basically does 3 things:
 Pre installation
 ================
 
+**OSX**
+
+* XCode for OSX 10.5; download 3.1.4 version: https://developer.apple.com/download/more/?name=Xcode
+* GIT for OSX 10.5: http://metastatic.org/source/git-osx.html
+* Download Python 2.7 pkg from python.org
+* Install old brew version from https://github.com/mistydemeo/tigerbrew with:
+  `ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"`
+
 **FreeBSD**
 
 ```
@@ -27,7 +35,6 @@ eval $(ssh-agent)  # do not prompt password on GIT push
 ```
 pkg install python git gcc
 ```
-
 
 Installation
 ============
@@ -58,5 +65,7 @@ Interesting stand-alone parts which may be useful
 * [home/.pythonstart](https://github.com/giampaolo/sysconf/blob/master/static/home/.pythonstart): auto-completion for the interatctive interpreter
 * [bin/grep.py](https://github.com/giampaolo/sysconf/blob/master/bin/grep.py):
   a clone of "ack" command but simpler.
+* [bin/codestats.py](https://github.com/giampaolo/sysconf/blob/master/bin/codestats.py):
+  show code stats about a project.
 * [bin/killall.py](https://github.com/giampaolo/sysconf/blob/master/bin/killall.py):
   a clone of "killall" command but it tries harder to kill a process.

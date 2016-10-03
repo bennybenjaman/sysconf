@@ -101,16 +101,29 @@ do_pkg() {
 }
 
 
+# OSX
+do_brew() {
+    # install brew
+    if ! type -P brew > /dev/null; then
+        ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"
+        sudo chown root /usr/local/bin/brew
+    fi
+    FORCE_UNSAFE_CONFIGURE=1 sudo brew install gcc git vim coreutils
+}
+
+
 main() {
     # install pkgs
-    if type -P apt > /dev/null; then
+    if type -P apt-get > /dev/null; then
         do_apt
     elif type -P pkg > /dev/null; then
         do_pkg
+    elif type -P brew > /dev/null; then
+        do_brew
     fi
 
     # install python stuff
-    python -m pip install --upgrade thefuck pip
+    python -m pip install --upgrade thefuck pip setuptools
 }
 
 main
