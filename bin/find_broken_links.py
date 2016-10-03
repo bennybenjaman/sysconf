@@ -8,13 +8,9 @@
 Look for broken urls in files.
 
 Usage:
-    find_broken_links.py [FILE ...]
-
-Options:
-    -v --verbose         # more verbose output
+    find_broken_links.py <FILE>...
 
 Example for checking all text files of a GIT project:
-
     git grep --cached -Il '' | xargs find_broken_links.py
 """
 
@@ -23,6 +19,7 @@ from __future__ import print_function
 import re
 import socket
 import sys
+from concurrent.futures import ThreadPoolExecutor
 try:
     from urllib2 import urlopen, Request
 except ImportError:
@@ -110,7 +107,7 @@ def try_url(url):
 def main(argv=None):
     # setup
     args = docopt(__doc__, argv=argv)
-    files = args['FILE']
+    files = args['<FILE>']
     urls = set()
     socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
@@ -118,29 +115,21 @@ def main(argv=None):
     for file in files:
         for url in find_urls(file):
             urls.add(url)
+    urls = sorted(urls)
 
     # inspect them
-    broken = []
-    total = len(urls)
-    for i, url in enumerate(sorted(urls), 1):
-        print("%s/%s: %s" % (
-            i, total, hilite(url, ok=None, bold=True)), end=" ")
-        err = try_url(url)
-        if err:
-            print(hilite("%s" % err, ok=False))
-            broken.append((url, err))
-        else:
-            print(hilite("OK"))
+    futs = {}
+    urls = sorted(urls)
+    with ThreadPoolExecutor(max_workers=200) as ex:
+        for url in urls:
+            futs[url] = ex.submit(try_url, url)
 
-    # tail
-    if broken:
-        print()
-        print("broken urls:")
-        for url, err in broken:
+    # done, print results
+    for url in urls:
+        err = futs[url].result()
+        if err:
             print("%s %s" % (url, hilite(err, ok=False)))
 
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 1:
-        sys.exit(__doc__)
-    main(sys.argv[1:])
+    main()
