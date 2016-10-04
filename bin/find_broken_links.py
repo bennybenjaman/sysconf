@@ -8,10 +8,11 @@
 Look for broken urls in files.
 
 Usage:
-    find_broken_links.py [-v] [-t <secs>] <file>...
+    find_broken_links.py [-v] [-u] [-t <secs>] <file>...
 
 Options:
     -v --verbose           # more verbose output
+    -u --urls-only         # just print urls and exit
     -t --timeout <secs>    # HTTP request timeout
 
 Example for checking all text files of a GIT project:
@@ -35,7 +36,7 @@ from docopt import docopt
 
 SOCKET_TIMEOUT = 5
 VERBOSE = False
-DONE = 0
+NUM_PROCESSED = 0
 
 
 def term_supports_colors():
@@ -97,7 +98,7 @@ def find_urls(file):
 
 
 def try_url(url, total):
-    global DONE
+    global NUM_PROCESSED
 
     class HeadRequest(Request):
         def get_method(self):
@@ -112,7 +113,9 @@ def try_url(url, total):
         if resp.code != 200:
             return "code == %s" % resp.code
     finally:
-        DONE += 1
+        NUM_PROCESSED += 1
+        if VERBOSE:
+            print("%s/%s %s" % (NUM_PROCESSED, total, url))
 
 
 def main(argv=None):
@@ -130,6 +133,12 @@ def main(argv=None):
         for url in find_urls(file):
             urls.add(url)
     urls = sorted(urls)
+
+    # just print urls
+    if args['--urls-only']:
+        for url in urls:
+            print(url)
+        return
 
     # inspect them
     futs = {}
