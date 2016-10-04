@@ -8,7 +8,11 @@
 Look for broken urls in files.
 
 Usage:
-    find_broken_links.py <FILE>...
+    find_broken_links.py [-v] [-t <secs>] <file>...
+
+Options:
+    -v --verbose           # more verbose output
+    -t --timeout <secs>    # HTTP request timeout
 
 Example for checking all text files of a GIT project:
     git grep --cached -Il '' | xargs find_broken_links.py
@@ -16,6 +20,7 @@ Example for checking all text files of a GIT project:
 
 
 from __future__ import print_function
+import os
 import re
 import socket
 import sys
@@ -29,6 +34,8 @@ from docopt import docopt
 
 
 SOCKET_TIMEOUT = 5
+VERBOSE = False
+DONE = 0
 
 
 def term_supports_colors():
@@ -89,11 +96,14 @@ def find_urls(file):
             yield url
 
 
-def try_url(url):
+def try_url(url, total):
+    global DONE
+
     class HeadRequest(Request):
         def get_method(self):
             return "HEAD"
 
+    err = None
     try:
         resp = urlopen(HeadRequest(url))
     except Exception as err:
@@ -101,15 +111,19 @@ def try_url(url):
     else:
         if resp.code != 200:
             return "code == %s" % resp.code
-    return None
+    finally:
+        DONE += 1
 
 
 def main(argv=None):
     # setup
+    global VERBOSE
     args = docopt(__doc__, argv=argv)
-    files = args['<FILE>']
+    files = args['<file>']
+    timeout = int(args['--timeout'] or 0) or SOCKET_TIMEOUT
+    VERBOSE = args['--verbose']
+    socket.setdefaulttimeout(timeout)
     urls = set()
-    socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
     # find urls
     for file in files:
@@ -122,7 +136,7 @@ def main(argv=None):
     urls = sorted(urls)
     with ThreadPoolExecutor(max_workers=200) as ex:
         for url in urls:
-            futs[url] = ex.submit(try_url, url)
+            futs[url] = ex.submit(try_url, url, len(urls))
 
     # done, print results
     for url in urls:
@@ -132,4 +146,7 @@ def main(argv=None):
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        os._exit(0)  # quick & dirty way to kill the thread pool
