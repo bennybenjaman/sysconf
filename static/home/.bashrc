@@ -544,7 +544,7 @@ sh-net-scp-ssh-keys() {
 # ===================================================================
 
 # install package
-sh-pkg-install() {
+sh-install() {
     if [ -z "$1" ]; then
         echo "usage: sh-pkg-ins https://github.com/giampaolo/psutil.gittall <pkg-name> "
         return
@@ -568,7 +568,7 @@ sh-pkg-install() {
 }
 
 # remove package
-sh-pkg-uninstall() {
+sh-uninstall() {
     if [ -z "$1" ]; then
         echo "usage: sh-pkg-uninstall <pkg-name> "
         return
@@ -737,6 +737,16 @@ sh-github-diff-branch() {
 # Print GIT authors.
 sh-git-stats-authors() {
     git shortlog -sn
+}
+
+
+# ===========================================================================
+# Virtualbox
+# ===========================================================================
+
+# List running VMs
+sh-vbox-list-running() {
+    VBoxManage list runningvms
 }
 
 
