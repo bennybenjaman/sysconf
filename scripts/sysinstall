@@ -64,7 +64,7 @@ do_apt() {
     # install all essential packages
     base="msttcorefonts vim build-essential ubuntu-restricted-extras sudo xclip"
     net="curl wget"
-    files="tree rar unrar"
+    files="tree rar unrar nfs-kernel-server"
     dev="git mercurial colordiff libreadline-dev libncurses*-dev python-dev python3-dev build-essential ack-grep libffi-dev libssl-dev libreadline-dev python-pip python3-pip"
     media="vlc ffmpeg"
     sys="openssh-server screen htop virtualbox xawtv indicator-cpufreq"
