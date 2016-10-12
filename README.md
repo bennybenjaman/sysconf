@@ -28,6 +28,18 @@ pkg install python bash git
 pkg install python git gcc
 ```
 
+**OpenBSD**
+
+TODO
+
+**NetBSD**
+
+TODO
+
+**OSX**
+
+TODO
+
 Installation
 ============
 
