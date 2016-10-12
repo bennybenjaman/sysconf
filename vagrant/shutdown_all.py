@@ -24,7 +24,7 @@ def main():
         if os.path.isdir(name):
             if os.path.isfile(os.path.join(name, 'Vagrantfile')):
                 with cwd(name):
-                    print("shutdown %s" % name)
+                    print(">>> shutdown %s <<<" % name)
                     ret = os.system('vagrant halt')
                     if ret != 0:
                         sys.exit(ret)
