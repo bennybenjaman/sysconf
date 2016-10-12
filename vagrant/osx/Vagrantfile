@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Re-adapted from: https://atlas.hashicorp.com/AndrewDryga/boxes/vagrant-box-osx/
+
 Vagrant.configure(2) do |config|
   config.vm.box = "http://files.dryga.com/boxes/osx-yosemite-0.2.1.box"
   config.vm.hostname = "osx"
