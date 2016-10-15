@@ -79,7 +79,7 @@ def main():
         sh("chsh -s /usr/local/bin/bash")
 
     # SSH
-    if os.path.isfile("~/.ssh/id_rsa"):
+    if os.path.exists(os.path.expanduser("~/.ssh/id_rsa")):
         sh("chmod 600 ~/.ssh/id_rsa")
 
 main()
