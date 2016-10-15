@@ -3,7 +3,7 @@
 set -e
 set -x
 
-# PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+
 SUDO=""
 
 
@@ -21,12 +21,30 @@ check_privileges() {
         if command_exists 'sudo' ; then
             SUDO="sudo"
         else
-            echo "must be root"
+            echo "must be root or install sudo"
             exit 1
         fi
     fi
 }
 
+
+install_pip() {
+    $SUDO python -c "import sys, ssl, os, pkgutil, tempfile, atexit; \
+        sys.exit(0) if pkgutil.find_loader('pip') else None; \
+        pyexc = 'from urllib.request import urlopen' if sys.version_info[0] == 3 else 'from urllib2 import urlopen'; \
+        exec(pyexc); \
+        context = ssl._create_unverified_context() if hasattr(ssl, '_create_unverified_context') else None; \
+        kw = dict(context=context) if context else {}; \
+        req = urlopen('https://bootstrap.pypa.io/get-pip.py', **kw); \
+        data = req.read(); \
+        f = tempfile.NamedTemporaryFile(suffix='.py'); \
+        atexit.register(f.close); \
+        f.write(data); \
+        f.flush(); \
+        print('downloaded %s' % f.name); \
+        code = os.system('%s %s --user' % (sys.executable, f.name)); \
+        sys.exit(code);"
+}
 
 # ...in case wget/curl are missing
 # usage: sh_net_httpfetch <url> [<file>]
@@ -60,7 +78,7 @@ check_privileges() {
 
 # install_pip() {
 #     if type -P pip > /dev/null; then
-#         sh_net_httpfetch $PIP_URL > /tmp/get-pip.py
+#         sh_net_httpfetch https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py
 #         python /tmp/get-pip.py
 #         rm /tmp/get-pip.py
 #     fi
@@ -97,12 +115,13 @@ do_apt() {
 # FreeBSD os Solaris
 do_pkg() {
     # FreeBSD
-    if echo "$OSTYPE" | grep 'freebsd'; then
-        $SUDO pkg install -y git vim screen gcc wget curl sudo python python3 wget curl tree xclip
+    if echo "$OSTYPE" | grep -i 'freebsd'; then
+        $SUDO pkg install -y git vim gcc sudo python tree xclip
+        return
     fi
 
     # Solaris
-    if echo "$OSTYPE" | grep 'solaris'; then
+    if echo "$OSTYPE" | grep -i 'solaris'; then
         # distutils assume cc; if not installed use gcc by creating a symlink
         if ! type -P cc > /dev/null; then
             $SUDO ln -s /usr//bin/gcc /usr/local/bin/cc
@@ -115,6 +134,7 @@ do_pkg() {
         if ! type -P vim > /dev/null; then
             $SUDO pkg install vim
         fi
+        return
     fi
 }
 
@@ -126,7 +146,7 @@ do_brew() {
         $SUDO ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"
         $SUDO chown root /usr/local/bin/brew
     fi
-    FORCE_UNSAFE_CONFIGURE=1 sudo brew install gcc git vim coreutils
+    FORCE_UNSAFE_CONFIGURE=1 $SUDO  brew install gcc git vim coreutils
 }
 
 
@@ -141,6 +161,9 @@ main() {
     elif command_exists 'brew' ; then
         do_brew
     fi
+
+    # install pip
+    install_pip
 
     # install python stuff
     $SUDO python -m pip install --upgrade thefuck pip setuptools
