@@ -15,14 +15,8 @@ command_exists() {
 
 check_privileges() {
     if [ "$(id -u)" != "0" ]; then
-        if command_exists 'sudo' ; then
-            SUDO="sudo"
-        else
-            echo "must be root or install sudo"
-            exit 1
-        fi
-    else
-        SUDO=""
+        echo "must be root"
+        exit 1
     fi
 }
 
