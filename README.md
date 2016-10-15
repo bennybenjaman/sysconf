@@ -18,8 +18,10 @@ This will do the following:
   [.bashrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.bashrc),
   [.vimrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.vimrc),
   [.gitconfig](https://github.com/giampaolo/sysconf/blob/master/static/home/.gitconfig))
-* `make install`: install this package (that means you'll get grep.py,
-   killal.py and other scripts installed)
+* `make install`: install this package (that means you'll get
+   [bin/grep.py](https://github.com/giampaolo/sysconf/blob/master/bin/grep.py),
+   [bin/killall.py](https://github.com/giampaolo/sysconf/blob/master/bin/killall.py),
+   and other scritps in [bin](https://github.com/giampaolo/sysconf/blob/master/bin/) directory.
 
 **WARNING**: these are my personal system settings; your tastes may differ so
 be aware!
