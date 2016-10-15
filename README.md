@@ -14,7 +14,7 @@ This will do the following:
 
 * `make sysinstall`: install all basic system deps (e.g. python, gcc, sudo)
 * `make sysconfig`: config system preferences (e.g. add sudoers)
-* `make userconfig`: * symnlink user config files to this cloned repository  (e.g.
+* `make userconfig`: symlinks user config files to this cloned repository  (e.g.
   [.bashrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.bashrc),
   [.vimrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.vimrc),
   [.gitconfig](https://github.com/giampaolo/sysconf/blob/master/static/home/.gitconfig))
