@@ -4,9 +4,6 @@ set -e
 set -x
 
 
-SUDO=""
-
-
 command_exists() {
     if command -v $1 > /dev/null 2>&1; then
         return 0
@@ -24,8 +21,13 @@ check_privileges() {
             echo "must be root or install sudo"
             exit 1
         fi
+    else
+        SUDO=""
     fi
 }
+
+
+check_privileges
 
 
 install_pip() {
@@ -116,7 +118,7 @@ do_apt() {
 do_pkg() {
     # FreeBSD
     if echo "$OSTYPE" | grep -i 'freebsd'; then
-        $SUDO pkg install -y git vim gcc sudo python tree xclip
+        $SUDO pkg install -y git vim gcc sudo python tree xclip bash
         return
     fi
 
@@ -151,8 +153,6 @@ do_brew() {
 
 
 main() {
-    check_privileges
-
     # install pkgs
     if command_exists 'apt-get' ; then
         do_apt

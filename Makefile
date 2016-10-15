@@ -18,6 +18,7 @@ clean:
 	rm -rf build
 	rm -rf dist
 
+# install this pkg
 install:
 	# Install pip (only if necessary).
 	$(PYTHON) -c "import sys, ssl, os, pkgutil, tempfile, atexit; \
@@ -40,17 +41,24 @@ install:
 	# Finally install this pkg.
 	$(PYTHON) setup.py develop --user
 
-runall:
-	$(PYTHON) setup.py runall
-
+# install base system deps (python, gcc, sudo, etc.)
 sysinstall:
-	sh scripts/sysinstall
+	./scripts/sysinstall
 
+# configure system (e.g. add sudoers)
 sysconfig:
-	$(PYTHON) setup.py sysconfig
+	sudo ./scripts/sysconfig
 
+# configure user deps (e.g. add bashrc)
 userconfig:
-	$(PYTHON) setup.py userconfig
+	./scripts/userconfig
+
+all:
+	$(MAKE) sysinstall
+	$(MAKE) sysconfig
+	$(MAKE) userconfig
+	$(MAKE) install
+
 
 flake8:
 	@git ls-files | grep \\.py$ | xargs $(PYTHON) -m flake8
