@@ -20,22 +20,22 @@ clean:
 
 # install this pkg
 install:
-	# Install pip (only if necessary).
-	$(PYTHON) -c "import sys, ssl, os, pkgutil, tempfile, atexit; \
-				sys.exit(0) if pkgutil.find_loader('pip') else None; \
-				pyexc = 'from urllib.request import urlopen' if sys.version_info[0] == 3 else 'from urllib2 import urlopen'; \
-				exec(pyexc); \
-				context = ssl._create_unverified_context() if hasattr(ssl, '_create_unverified_context') else None; \
-				kw = dict(context=context) if context else {}; \
-				req = urlopen('https://bootstrap.pypa.io/get-pip.py', **kw); \
-				data = req.read(); \
-				f = tempfile.NamedTemporaryFile(suffix='.py'); \
-				atexit.register(f.close); \
-				f.write(data); \
-				f.flush(); \
-				print('downloaded %s' % f.name); \
-				code = os.system('%s %s --user' % (sys.executable, f.name)); \
-				sys.exit(code);"
+	# # Install pip (only if necessary).
+	# $(PYTHON) -c "import sys, ssl, os, pkgutil, tempfile, atexit; \
+	# 			sys.exit(0) if pkgutil.find_loader('pip') else None; \
+	# 			pyexc = 'from urllib.request import urlopen' if sys.version_info[0] == 3 else 'from urllib2 import urlopen'; \
+	# 			exec(pyexc); \
+	# 			context = ssl._create_unverified_context() if hasattr(ssl, '_create_unverified_context') else None; \
+	# 			kw = dict(context=context) if context else {}; \
+	# 			req = urlopen('https://bootstrap.pypa.io/get-pip.py', **kw); \
+	# 			data = req.read(); \
+	# 			f = tempfile.NamedTemporaryFile(suffix='.py'); \
+	# 			atexit.register(f.close); \
+	# 			f.write(data); \
+	# 			f.flush(); \
+	# 			print('downloaded %s' % f.name); \
+	# 			code = os.system('%s %s --user' % (sys.executable, f.name)); \
+	# 			sys.exit(code);"
 	# Install setuptools (required 'cause we want 'develop' / 'edit' mode).
 	$(PYTHON) -m pip install --user --upgrade setuptools docopt futures
 	# Finally install this pkg.
@@ -58,7 +58,6 @@ all:
 	$(MAKE) sysconfig
 	$(MAKE) userconfig
 	$(MAKE) install
-
 
 flake8:
 	@git ls-files | grep \\.py$ | xargs $(PYTHON) -m flake8
