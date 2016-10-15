@@ -44,7 +44,7 @@ runall:
 	$(PYTHON) setup.py runall
 
 sysinstall:
-	$(PYTHON) setup.py sysinstall
+	sh scripts/sysinstall
 
 sysconfig:
 	$(PYTHON) setup.py sysconfig

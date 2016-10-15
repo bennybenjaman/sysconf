@@ -1,13 +1,31 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 set -x
 
 # PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+SUDO=""
 
-if [ "$(id -u)" != "0" ]; then
-    echo "must be root" && exit 1
-fi
+
+command_exists() {
+    if command -v $1 > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+check_privileges() {
+    if [ "$(id -u)" != "0" ]; then
+        if command_exists 'sudo' ; then
+            SUDO="sudo"
+        else
+            echo "must be root"
+            exit 1
+        fi
+    fi
+}
 
 
 # ...in case wget/curl are missing
@@ -52,14 +70,14 @@ fi
 # Ubuntu / Debian
 do_apt() {
     # add chrome ppa http://www.ubuntuupdates.org/ppa/google_chrome
-    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-    rm /etc/apt/sources.list.d/google.list
-    sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | $SUDO apt-key add -
+    $SUDO rm -f /etc/apt/sources.list.d/google.list
+    $SUDO sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 
     # add skype ppa http://www.ubuntugeek.com/how-to-install-skype-in-ubuntu-12-04precise.html
-    apt-add-repository "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
+    $SUDO apt-add-repository "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
 
-    add-apt-repository "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
+    $SUDO add-apt-repository "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
 
     # install all essential packages
     base="msttcorefonts vim build-essential ubuntu-restricted-extras sudo xclip"
@@ -69,10 +87,10 @@ do_apt() {
     media="vlc ffmpeg"
     sys="openssh-server screen htop virtualbox xawtv indicator-cpufreq"
     ppa="google-chrome-stable skype"
-    apt-get update
-    apt-get install -y $base $net $files $dev $media $sys $ppa
-    apt-get install -y linux-headers-`uname -r`
-    apt-get autoremove -y
+    $SUDO apt-get update
+    $SUDO apt-get install -y $base $net $files $dev $media $sys $ppa
+    $SUDO apt-get install -y linux-headers-`uname -r`
+    $SUDO apt-get autoremove -y
 }
 
 
@@ -80,22 +98,22 @@ do_apt() {
 do_pkg() {
     # FreeBSD
     if echo "$OSTYPE" | grep 'freebsd'; then
-        pkg install -y git vim screen gcc wget curl sudo python python3 wget curl tree xclip
+        $SUDO pkg install -y git vim screen gcc wget curl sudo python python3 wget curl tree xclip
     fi
 
     # Solaris
     if echo "$OSTYPE" | grep 'solaris'; then
         # distutils assume cc; if not installed use gcc by creating a symlink
         if ! type -P cc > /dev/null; then
-            ln -s /usr//bin/gcc /usr/local/bin/cc
+            $SUDO ln -s /usr//bin/gcc /usr/local/bin/cc
         fi
 
         # install pkgs
         if ! type -P gcc > /dev/null; then
-            pkg install gcc
+            $SUDO pkg install gcc
         fi
         if ! type -P vim > /dev/null; then
-            pkg install vim
+            $SUDO pkg install vim
         fi
     fi
 }
@@ -105,25 +123,27 @@ do_pkg() {
 do_brew() {
     # install brew
     if ! type -P brew > /dev/null; then
-        ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"
-        sudo chown root /usr/local/bin/brew
+        $SUDO ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"
+        $SUDO chown root /usr/local/bin/brew
     fi
     FORCE_UNSAFE_CONFIGURE=1 sudo brew install gcc git vim coreutils
 }
 
 
 main() {
+    check_privileges
+
     # install pkgs
-    if type -P apt-get > /dev/null; then
+    if command_exists 'apt-get' ; then
         do_apt
-    elif type -P pkg > /dev/null; then
+    elif command_exists 'pkg' ; then
         do_pkg
-    elif type -P brew > /dev/null; then
+    elif command_exists 'brew' ; then
         do_brew
     fi
 
     # install python stuff
-    python -m pip install --upgrade thefuck pip setuptools
+    $SUDO python -m pip install --upgrade thefuck pip setuptools
 }
 
 main
