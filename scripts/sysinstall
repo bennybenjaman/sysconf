@@ -166,7 +166,7 @@ main() {
     install_pip
 
     # install python stuff
-    $SUDO python -m pip install --upgrade thefuck pip setuptools
+    $SUDO python -m pip install --upgrade pip setuptools
 }
 
 main
