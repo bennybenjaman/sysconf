@@ -6,7 +6,6 @@
 
 PLATFORM="$(python -c "import sys; print(sys.platform)")"
 SYSCONF_BIN_DIR="$(python -c "import sysconf; print(sysconf.DIR_BIN)")"
-PIP_URL="https://bootstrap.pypa.io/get-pip.py"
 LAPTOP="N501VW"  # mt hostname / laptop id
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
 
@@ -317,7 +316,7 @@ sh-py-install-pip() {
         fi
     # python 2.6+
     else
-        sh-net-httpfetch $PIP_URL > /tmp/get-pip.py
+        sh-net-httpfetch https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py
         if [ "$(id -u)" == "0" ]; then
             $1 /tmp/get-pip.py
         else
@@ -806,7 +805,7 @@ _print_sysinfo() {
     else
         echo -e "Arch:     32-bit"
     fi
-    echo -e "Python:   `python -c 'import sys; sys.stdout.write(sys.version.split()[0])'`"
+    echo -e "Python: `python -c 'import sys; sys.stdout.write(sys.version.split()[0])'`"
     echo -en "${_nc}"
 }
 
