@@ -5,3 +5,4 @@
 * Download Python 2.7 pkg from python.org
 * Install old brew version from https://github.com/mistydemeo/tigerbrew with:
   `ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"`
+* http://apple.stackexchange.com/questions/75684/installing-xcode-via-command-line
