@@ -49,7 +49,7 @@ sysinstall:
 
 # configure system (e.g. add sudoers)
 sysconfig:
-	sudo ./scripts/sysconfig
+	./scripts/sysconfig
 
 # configure user deps (e.g. add bashrc)
 userconfig:

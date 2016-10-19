@@ -114,7 +114,7 @@ do_apt() {
 }
 
 
-# FreeBSD os Solaris
+# FreeBSD or Solaris
 do_pkg() {
     # FreeBSD
     if echo "$OSTYPE" | grep -i 'freebsd'; then
@@ -152,6 +152,34 @@ do_brew() {
 }
 
 
+do_pkg_add() {
+    # OpenBSD
+    if echo `uname -a` | grep -i 'openbsd'; then
+        export PKG_PATH="http://ftp.openbsd.org/pub/OpenBSD/`uname -r`/packages/`arch -s`/"
+
+        if ! command_exists 'rsync' ; then
+            $SUDO pkg_add -I rsync--
+        fi
+        if ! command_exists 'sudo' ; then
+            $SUDO pkg_add -I sudo--
+        fi
+        if ! command_exists 'bash' ; then
+            $SUDO pkg_add -I bash--
+        fi
+        if ! command_exists 'python' ; then
+            if ! command_exists 'python2.7' ; then
+                $SUDO pkg_add -I python-2.7.11--
+            fi
+        fi
+
+        # symlink python
+        if ! command_exists 'python' ; then
+            $SUDO ln -s /usr/local/bin/python2.7 /usr/local/bin/python
+        fi
+    fi
+}
+
+
 main() {
     # install pkgs
     if command_exists 'apt-get' ; then
@@ -160,9 +188,10 @@ main() {
         do_pkg
     elif command_exists 'brew' ; then
         do_brew
+    elif command_exists 'pkg_add' ; then
+        do_pkg_add
     fi
 
-    # install pip
     install_pip
 
     # install python stuff
