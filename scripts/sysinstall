@@ -44,7 +44,7 @@ install_pip() {
         f.write(data); \
         f.flush(); \
         print('downloaded %s' % f.name); \
-        code = os.system('%s %s --user' % (sys.executable, f.name)); \
+        code = os.system('%s %s' % (sys.executable, f.name)); \
         sys.exit(code);"
 }
 

@@ -22,7 +22,6 @@ clean:
 # Install pip (only if necessary).
 install-pip:
 	$(PYTHON) -c "import sys, ssl, os, pkgutil, tempfile, atexit; \
-				sys.exit(0) if pkgutil.find_loader('pip') else None; \
 				pyexc = 'from urllib.request import urlopen' if sys.version_info[0] == 3 else 'from urllib2 import urlopen'; \
 				exec(pyexc); \
 				context = ssl._create_unverified_context() if hasattr(ssl, '_create_unverified_context') else None; \
@@ -34,7 +33,7 @@ install-pip:
 				f.write(data); \
 				f.flush(); \
 				print('downloaded %s' % f.name); \
-				code = os.system('%s %s --user' % (sys.executable, f.name)); \
+				code = os.system('%s %s' % (sys.executable, f.name)); \
 				sys.exit(code);"
 
 # install this pkg
