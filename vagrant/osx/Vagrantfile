@@ -1,6 +1,3 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
 # Re-adapted from: https://atlas.hashicorp.com/AndrewDryga/boxes/vagrant-box-osx/
 
 Vagrant.configure(2) do |config|

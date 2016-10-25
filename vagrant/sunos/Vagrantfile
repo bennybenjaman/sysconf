@@ -1,11 +1,11 @@
-# https://vagrantcloud.com/jonatasbaldin/boxes/solaris11
+# https://vagrantcloud.com/dariusjs/boxes/solaris_11_2
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "jonatasbaldin/solaris11"
+  config.vm.box = "dariusjs/solaris_11_2"
   config.vm.hostname = "sunos"
   config.vm.box_download_insecure = true
   config.vm.network "private_network", ip: "192.168.50.83"
-  config.vm.synced_folder "/home/giampaolo/svn/", "/vagrant", :nfs => { :mount_options =>  ["dmode=777","fmode=777"] }
+  config.vm.synced_folder "/home/giampaolo/svn", "/vagrant"
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "2048"
   end
