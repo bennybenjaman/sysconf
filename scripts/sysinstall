@@ -114,27 +114,30 @@ do_apt() {
 }
 
 
-# FreeBSD or Solaris
+# FreeBSD or SunOS
 do_pkg() {
     # FreeBSD
     if echo "$OSTYPE" | grep -i 'freebsd'; then
-        $SUDO pkg install -y git vim gcc sudo python tree xclip bash
+        $SUDO pkg install -y gcc sudo python tree xclip bash
         return
     fi
 
-    # Solaris
+    # SunOS
     if echo "$OSTYPE" | grep -i 'solaris'; then
-        # distutils assume cc; if not installed use gcc by creating a symlink
-        if ! type -P cc > /dev/null; then
-            $SUDO ln -s /usr//bin/gcc /usr/local/bin/cc
-        fi
-
-        # install pkgs
-        if ! type -P gcc > /dev/null; then
+        if ! command_exists 'gcc' ; then
             $SUDO pkg install gcc
         fi
-        if ! type -P vim > /dev/null; then
-            $SUDO pkg install vim
+        if ! command_exists 'bash' ; then
+            $SUDO pkg install bash
+        fi
+        if ! command_exists 'python2.7' ; then
+            $SUDO pkg install python-27
+            $SUDO rm -f /usr/bin/python
+            $SUDO ln -s /usr/bin/python2.7 /usr/bin/python
+        fi
+        # distutils assume cc; if not installed use gcc by creating a symlink
+        if ! command_exists 'cc' ; then
+            $SUDO ln -s /usr/bin/gcc /usr/bin/cc
         fi
         return
     fi
