@@ -3,6 +3,7 @@
 
 # You can set these variables from the command line.
 PYTHON = python
+INSTALL_OPTS = `$(PYTHON) -c "import os; print('' if os.geteuid() == 0 else '--user')"`
 
 clean:
 	rm -f `find . -type f -name \*.py[co]`
@@ -38,9 +39,8 @@ install-pip:
 
 # install this pkg
 install:
-	$(PYTHON) -m pip install --user --upgrade setuptools docopt futures
-	# Finally install this pkg.
-	$(PYTHON) setup.py develop --user
+	$(PYTHON) -m pip install $(INSTALL_OPTS) --upgrade setuptools docopt futures
+	$(PYTHON) setup.py develop $(INSTALL_OPTS)
 
 # install base system deps (python, gcc, sudo, etc.)
 sysinstall:

@@ -146,9 +146,10 @@ do_brew() {
     # install brew
     if ! type -P brew > /dev/null; then
         $SUDO ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"
-        $SUDO chown root /usr/local/bin/brew
     fi
-    FORCE_UNSAFE_CONFIGURE=1 $SUDO  brew install gcc git vim coreutils
+    # fix for https://github.com/Homebrew/legacy-homebrew/issues/9953
+    $SUDO chown root /usr/local/bin/brew
+    $SUDO brew install gcc git vim coreutils
 }
 
 
