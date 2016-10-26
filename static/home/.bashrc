@@ -466,7 +466,7 @@ sh-install() {
         if command_exists 'sudo' ; then
             SUDO="sudo"
         else
-            echo "must be root or install $SUDO"
+            echo "must be root or install sudo"
             exit 1
         fi
     else
