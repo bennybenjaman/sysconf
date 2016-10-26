@@ -257,10 +257,25 @@ realpath() {
     python -c "import os; print(os.path.realpath(os.path.normpath('$1')))"
 }
 
+
 # ===================================================================
 # User defined utility functions start here.
 # All starts with "sh-" namespace so that I won't pollute PATH namespace.
 # ===================================================================
+
+
+# ===================================================================
+# utils
+# ===================================================================
+
+
+command_exists() {
+    if command -v $1 > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 
 # ===================================================================
@@ -447,23 +462,34 @@ sh-net-scp-ssh-keys() {
 
 # install package
 sh-install() {
-    if [ -z "$1" ]; then
-        echo "usage: sh-pkg-ins https://github.com/giampaolo/psutil.gittall <pkg-name> "
-        return
+    if [ "$(id -u)" != "0" ]; then
+        if command_exists 'sudo' ; then
+            SUDO="sudo"
+        else
+            echo "must be root or install $SUDO"
+            exit 1
+        fi
+    else
+        $SUDO=""
     fi
-    # TODO: better handling of auth (sudo)
+
     # ubuntu / debian
-    if type -P apt > /dev/null; then
-        sudo apt-get install $1
+    if command_exists "apt-get"; then
+        $SUDO apt-get install $1
     # osx
-    elif type -P brew > /dev/null; then
-        sudo brew install $1
+    elif echo `uname -a` | grep -i 'darwin'; then
+        if ! command_exists 'brew' ; then
+            ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"
+            # fix for https://github.com/Homebrew/legacy-homebrew/issues/9953
+            $SUDO chown root /usr/local/bin/brew
+        fi
+        $SUDO brew install $1
     # solaris
-    elif type -P pkg > /dev/null; then
-        pkg install $1
+    elif command_exists "pkg"; then
+        $SUDO pkg install $1
     # freebsd
-    elif type -P pkg_add > /dev/null; then
-        pkg_add -r $1
+    elif command_exists "pkg_add"; then
+        $SUDO pkg_add -r $1
     else
         echo "system not supported"
     fi
