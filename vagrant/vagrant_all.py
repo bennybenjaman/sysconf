@@ -20,12 +20,16 @@ def cwd(path):
 
 
 def main():
+    try:
+        cmd = sys.argv[1]
+    except IndexError:
+        sys.exit("usage: vagrant-all <CMD>")
     for name in os.listdir('.'):
         if os.path.isdir(name):
             if os.path.isfile(os.path.join(name, 'Vagrantfile')):
                 with cwd(name):
                     print(">>> suspend %s <<<" % name)
-                    ret = os.system('vagrant suspend')
+                    ret = os.system('vagrant %s' % cmd)
                     if ret != 0:
                         sys.exit(ret)
 
