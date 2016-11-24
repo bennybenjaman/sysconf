@@ -120,8 +120,9 @@ export PAGER="less"
 export HISTCONTROL=ignoredups:erasedups  # no duplicate entries
 export HISTSIZE=100000                   # big big history
 export HISTFILESIZE=100000               # big big history
-shopt -s histappend                # append to history, don't overwrite it
-export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+# decommend to share the history amongst all shells
+# shopt -s histappend                # append to history, don't overwrite it
+# export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 # http://code.activestate.com/recipes/578098-python-interpreter-auto-completion-and-history/
 export PYTHONSTARTUP=~/.pythonstart
@@ -386,6 +387,14 @@ sh-py-pip-upgrade-all() {
 
 alias sh-net-netstat-listen='sudo netstat -antp | grep LISTEN'
 alias sh-net-ping-google='ping google.com'
+
+
+# reset network
+sh-net-reset() {
+    sudo /etc/init.d/networking restart
+    sudo /etc/init.d/network-manager restart
+}
+
 
 # ...in case wget/curl are missing
 # usage: sh-net-httpfetch <url> [<file>]
@@ -739,10 +748,14 @@ _print_sysinfo() {
 }
 
 
-
 # ===================================================================
 # Final stuff
 # ===================================================================
+
+# configure thefuck
+if command_exists 'fuck' ; then
+    eval $(thefuck --alias)
+fi
 
 # print a banner to figure out what machine I'm on
 _print_sysinfo
