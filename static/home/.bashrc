@@ -9,6 +9,13 @@ SYSCONF_BIN_DIR="$(python -c "import sysconf; print(sysconf.DIR_BIN)")"
 LAPTOP="N501VW"  # mt hostname / laptop id
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # this dir
 
+command_exists() {
+    if command -v $1 > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 # ===================================================================
 # Extracted from default Ubuntu's .bashrc
@@ -217,13 +224,19 @@ alias hg-ci-push='hg ci -m "progress" && hg push'
 alias hg-pull='hg pull -u -v'
 
 # sublime
-alias s='subl'
+if command_exists 'subl' ; then
+    alias s='subl'
+elif command_exists 'vim' ; then
+    alias s='vim'
+else
+    alias s='vi'
+fi
 
 # vim
-if type -P vim > /dev/null; then
+if command_exists 'vim' ; then
+    alias vi="vim"
     export EDITOR="vim"
     export VISUAL="vim"
-    alias vi="vim"
 else
     export EDITOR="vi"
     export VISUAL="vi"
@@ -263,21 +276,6 @@ realpath() {
 # User defined utility functions start here.
 # All starts with "sh-" namespace so that I won't pollute PATH namespace.
 # ===================================================================
-
-
-# ===================================================================
-# utils
-# ===================================================================
-
-
-command_exists() {
-    if command -v $1 > /dev/null 2>&1; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 
 # ===================================================================
 # Dev / Python
