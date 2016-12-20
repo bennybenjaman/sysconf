@@ -674,6 +674,11 @@ sh-git-stats-authors() {
     git shortlog -sn
 }
 
+# Print files which are not under revision control.
+sh-git-unrevisioned-files() {
+    git ls-files --others --ignored --exclude-from=.gitignore
+}
+
 
 # ===========================================================================
 # Virtualbox

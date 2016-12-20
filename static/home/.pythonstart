@@ -4,46 +4,42 @@
 Python interpreter auto-completion, history and colored tracebacks.
 Installation:
 
- $ wget http://code.activestate.com/recipes/578098/download/1/ -O ~/.pythonstart
- $ echo "export PYTHONSTARTUP=~/.pythonstart" >> ~/.bashrc
- $ source ~/.bashrc
+    $ wget http://code.activestate.com/recipes/578098/download/1/ -O ~/.pythonstart
+    $ echo "export PYTHONSTARTUP=~/.pythonstart" >> ~/.bashrc
+    $ source ~/.bashrc
 """
 
 # Author: Giampaolo Rodola' <g.rodola [AT] gmail [DOT] com>
 # License: MIT
 
-if not hasattr(__name__, "__file__"):  # interpreter mode
-    from pprint import pprint as pp
+if not hasattr(__name__, "__file__"):  # interactive interpreter mode
+    # want to be able to do ">>> pp(var)"
+    from pprint import pprint as pp  # NOQA
 
+    # tab completion and history
     def autocomplete():
         import atexit
         import os
         import readline
-        import rlcompleter
+        import rlcompleter  # NOQA
 
+        HIST_FILE = os.path.expanduser("~/.pyhistory")
+
+        @atexit.register
         def save_history():
             readline.set_history_length(10000)
-            readline.write_history_file(history_path)
+            readline.write_history_file(HIST_FILE)
 
-        history_path = os.path.expanduser("~/.pyhistory")
-        if os.path.exists(history_path):
-            readline.read_history_file(history_path)
-        atexit.register(save_history)
+        if os.path.exists(HIST_FILE):
+            readline.read_history_file(HIST_FILE)
         readline.parse_and_bind('tab: complete')
 
+    # colored tracebacks
     def tb_colors():
-        try:
-            import xtraceback  # https://pypi.python.org/pypi/xtraceback/
-        except ImportError:
-            pass
-        else:
-            xtraceback.StdlibCompat().install()
+        import colored_traceback  # requires 'pip install colored_traceback'
+        colored_traceback.add_hook(always=True)
 
     autocomplete()
     tb_colors()
 
     del autocomplete, tb_colors
-
-
-import colored_traceback
-colored_traceback.add_hook(always=True)
