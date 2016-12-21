@@ -679,6 +679,14 @@ sh-git-unrevisioned-files() {
     git ls-files --others --ignored --exclude-from=.gitignore
 }
 
+# When forking a github project, this will pull and merge latest changes
+# from original project repo.
+sh-git-merge-upstream() {
+    git fetch upstream
+    git checkout master
+    git merge upstream/master
+}
+
 
 # ===========================================================================
 # Virtualbox

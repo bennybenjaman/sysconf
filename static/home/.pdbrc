@@ -11,7 +11,7 @@ alias ppc import inspect; print(inspect.getsource(%1))
 # 'ppo' will pretty-print members and values of ordinary Python objects.
 alias ppo pp %1.__dict__
 
-# ppio runs ppo over a sequence of objects
+# 'ppio' runs 'ppo' over a sequence of objects
 alias ppio pp [a.__dict__ for a in %1]
 
 # 'help x' opens the man-style help viewer from the interpretter on an object
