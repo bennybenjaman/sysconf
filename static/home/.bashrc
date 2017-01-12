@@ -596,6 +596,22 @@ if type -P dpkg > /dev/null; then
 fi
 
 
+sh-cleanup-system() {
+    sudo apt-get autoremove
+    sudo apt-get clean
+    sudo apt-get autoclean
+}
+
+
+sh-cleanup-chrome() {
+    sudo apt-get purge google-chrome-stable
+    rm -rf ~/.cache/chromium/
+    rm -rf ~/.config/chromium/
+    sudo rm -rf /etc/chromium-browser
+    sudo apt-get install google-chrome-stable
+}
+
+
 # ===================================================================
 # Paths
 # ===================================================================
