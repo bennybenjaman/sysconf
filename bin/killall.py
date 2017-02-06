@@ -10,12 +10,13 @@ harder to kill the process by:
 - sending also SIGKILL is process survives SIGTERM
 
 Usage:
-    killall.py [-d] [-t] [-v] <name>
+    killall.py [-d] [-t] [-v] [-r] <name>
 
 Options:
     -d --dryrun     # just print processes matching <name> without killing them
     -t --timeout    # how much to wait for proc to die
     -v --verbose    # print more info about the process
+    -r --recursive  # also includes children
 """
 
 from __future__ import print_function
@@ -57,7 +58,7 @@ def str_proc(p):
         return str(ntproc(p.pid, p.name(), p.status(), p.ppid(), parname))
 
 
-def find_procs(name):
+def find_procs(name, recursive=False):
     procs = []
     for p in psutil.process_iter():
         if p.pid != THIS_PID:
@@ -72,6 +73,10 @@ def find_procs(name):
                 if name in p_name or name in ' '.join(p_cmdline):
                     p.strrepr = str_proc(p)
                     procs.append(p)
+                    if recursive:
+                        for child in p.children():
+                            child.strrepr = str_proc(child)
+                            procs.append(child)
     return procs
 
 
@@ -115,10 +120,11 @@ def main():
     name = args['<name>']
     dryrun = args['--dryrun']
     timeout = args['--timeout'] or TIMEOUT
+    recursive = args['--recursive']
     VERBOSE = args['--verbose']
 
     # get procs matching criteria
-    procs = find_procs(name)
+    procs = find_procs(name, recursive=recursive)
     if not procs:
         return
 

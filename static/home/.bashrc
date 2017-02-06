@@ -658,7 +658,8 @@ sh-path-size() {
 # Remove session file, so that next time subl is opened it will not load
 # previosly opened files/tabs.
 sh-subl-rm-session() {
-    rm ~/.config/sublime-text-3/Local/Session.sublime_session
+    rm -f ~/.config/sublime-text-3/Local/Session.sublime_session
+    rm -f ~/.config/sublime-text-3/Local/Auto\ Save\ Session.sublime_session
 }
 
 
