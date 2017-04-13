@@ -312,6 +312,7 @@ sh-py-clean-build-files() {
     fi
 }
 
+
 # install python for the given python version
 sh-py-install-pip() {
     if [ -z "$1" ] ; then
@@ -604,11 +605,11 @@ sh-cleanup-system() {
 
 
 sh-cleanup-chrome() {
-    sudo apt-get purge google-chrome-stable
-    rm -rf ~/.cache/chromium/
-    rm -rf ~/.config/chromium/
+    sudo apt-get purge -y google-chrome*
+    rm -rf ~/.config/google-chrome/
+    rm -rf ~/.cache/google-chrome/
     sudo rm -rf /etc/chromium-browser
-    sudo apt-get install google-chrome-stable
+    sudo apt-get install -y google-chrome-stable
 }
 
 
@@ -714,6 +715,19 @@ sh-vbox-list-running() {
     VBoxManage list runningvms
 }
 
+
+# ===========================================================================
+# Others
+# ===========================================================================
+
+# Set audio volume.
+sh-volume() {
+    if [ -z "$1" ] ; then
+        echo "usage: sh-volume <volume-percent>"
+        return
+    fi
+    pactl -- set-sink-volume 0 $1%
+}
 
 # ===========================================================================
 # Internal utils
