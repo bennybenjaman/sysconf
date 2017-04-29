@@ -5,15 +5,17 @@ def main():
     import atexit
     import os
     import readline
-    import rlcompleter
     import sys
     import termios
     import textwrap
 
+    # =================================================================
+    # --- utils
+    # =================================================================
+
     HISTFILE = os.path.expanduser("~/.pyhistory")
 
     def term_supports_colors():
-        import sys
         file = sys.stdout
         try:
             import curses
@@ -25,28 +27,31 @@ def main():
         else:
             return True
 
-    if term_supports_colors():
-        def hilite(s, ok=True, bold=False):
-            """Return an highlighted version of 'string'."""
-            attr = []
-            if ok is None:  # no color
-                pass
-            elif ok:   # green
-                attr.append('32')
-            else:   # red
-                attr.append('31')
-            if bold:
-                attr.append('1')
-            return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
-    else:
-        def hilite(s, *a, **k):
+    TERM_SUPPORTS_COLORS = term_supports_colors()
+
+    def hilite(s, ok=True, bold=False):
+        """Return an highlighted version of 'string'."""
+        if not TERM_SUPPORTS_COLORS:
             return s
+        attr = []
+        if ok is None:  # no color
+            pass
+        elif ok:   # green
+            attr.append('32')
+        else:   # red
+            attr.append('31')
+        if bold:
+            attr.append('1')
+        return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
 
     def print_(s):
         print(hilite(s))
 
-    # tab-completion.
-    pdb.Pdb.complete = rlcompleter.Completer(locals()).complete
+    # =================================================================
+    # --- ok, here we go
+    # =================================================================
+
+    # tab completion
     if sys.platform.startswith("darwin"):
         readline.parse_and_bind("bind ^I rl_complete")
     else:
@@ -74,36 +79,26 @@ def main():
 
     help_ = textwrap.dedent("""\
         h(elp) [obj]  : same as help(obj)
-        w(here)       : print a stack trace, with the most recent frame at the
-                        bottom. An arrow indicates the current frame.
+        w(here)       : print a stack trace
         d(own)        : move the current frame one level down in the stack
-                        trace
         u(p)          : move the current frame one level up in the stack trace
         b(reak) [[filename:]lineno | function[, condition]]
                       : sets breakpoint
         tbreak [[filename:]lineno | function[, condition]]
-                      : sets a temporary breakpoint, which is removed
-                        automatically when it is first hit
+                      : sets a temporary breakpoint
         cl(ear) [filename:lineno | bpnumber [bpnumber ...]]
                       : clear breakpoints
         s(tep)        : step into function
         n(ext)        : next line
         unt(il)       : continue execution until the line with the line number
-                        greater than the current one is reached or when
-                        returning from current frame
+                        greater than the current one is reached
         r(eturn)      : continue execution until the current function returns
         c(ont(inue))  : continue execution
-        j(ump) lineno : set the next line that will be executed; this lets you
-                        jump back and execute code again, or jump forward to
-                        skip code that you don’t want to run.
+        j(ump) lineno : set the next line that will be executed
         l(ist) [first[, last]]
-                      : list source code for the current file; without
-                        arguments, list 11 lines around the current line;
-                        with one argument, list 11 lines around at that line;
-                        with two arguments, list the given range;
+                      : list source code for the current file;
         a(rgs)        : print the argument list of the current function
-        p expression  : evaluate the expression in the current context and
-                        print its value
+        p expression  : evaluate expr and print its value
         pp <obj>      : pretty print obj
         alias [name [command]]
                       : creates an alias
@@ -113,5 +108,13 @@ def main():
         """)
     print_(help_)
 
+
 main()
-del main
+
+# Tab completion for pdb. Ths *NEEDS* to be done globally.
+# Also, at this
+import rlcompleter
+pdb.Pdb.complete = rlcompleter.Completer(locals()).complete
+
+# Cleanup namespace.
+del main, rlcompleter
