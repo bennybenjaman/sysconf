@@ -1,20 +1,63 @@
 #!/usr/bin/env python
 
 """
-Python interpreter auto-completion, history and colored tracebacks.
+This script is executed when python is started in interpreter mode.
+
+Adds:
+- auto-completion
+- history
+- colored tracebacks
+- colored ">>>" prompt
+
 Installation:
 
     $ wget http://code.activestate.com/recipes/578098/download/1/ -O ~/.pythonstart
     $ echo "export PYTHONSTARTUP=~/.pythonstart" >> ~/.bashrc
     $ source ~/.bashrc
+
+Author: Giampaolo Rodola' <g.rodola [AT] gmail [DOT] com>
+License: MIT
 """
 
-# Author: Giampaolo Rodola' <g.rodola [AT] gmail [DOT] com>
-# License: MIT
-
 if not hasattr(__name__, "__file__"):  # interactive interpreter mode
-    # want to be able to do ">>> pp(var)"
-    from pprint import pprint as pp  # NOQA
+
+    # =================================================================
+    # --- utils
+    # =================================================================
+
+    def _term_supports_colors():
+        import sys
+        file = sys.stdout
+        try:
+            import curses
+            assert file.isatty()
+            curses.setupterm()
+            assert curses.tigetnum("colors") > 0
+        except Exception:
+            return False
+        else:
+            return True
+
+    if _term_supports_colors():
+        def _hilite(s, ok=True, bold=False):
+            """Return an highlighted version of 'string'."""
+            attr = []
+            if ok is None:  # no color
+                pass
+            elif ok:   # green
+                attr.append('32')
+            else:   # red
+                attr.append('31')
+            if bold:
+                attr.append('1')
+            return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
+    else:
+        def _hilite(s, *a, **k):
+            return s
+
+    # =================================================================
+    # ---API
+    # =================================================================
 
     # tab completion and history
     def autocomplete():
@@ -22,6 +65,7 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
         import os
         import readline
         import rlcompleter  # NOQA
+        import sys
 
         HIST_FILE = os.path.expanduser("~/.pyhistory")
 
@@ -32,14 +76,37 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
 
         if os.path.exists(HIST_FILE):
             readline.read_history_file(HIST_FILE)
-        readline.parse_and_bind('tab: complete')
+
+        if sys.platform.startswith("darwin"):
+            readline.parse_and_bind("bind ^I rl_complete")
+        else:
+            readline.parse_and_bind('tab: complete')
 
     # colored tracebacks
     def tb_colors():
-        import colored_traceback  # requires 'pip install colored_traceback'
-        colored_traceback.add_hook(always=True)
+        try:
+            # requires 'pip install colored_traceback'
+            import colored_traceback
+        except ImportError:
+            print(_hilite('colored_traceback module not installed', ok=0))
+        else:
+            colored_traceback.add_hook(always=True)
+
+    # set ">>>" color
+    def prompt_color():
+        import sys
+        sys.ps1 = '\033[01;34m>>>\033[00m '
+
+    # =================================================================
+    # --- installation
+    # =================================================================
 
     autocomplete()
     tb_colors()
+    prompt_color()
 
-    del autocomplete, tb_colors
+    # cleanup namespace
+    del autocomplete, tb_colors, _term_supports_colors, _hilite, prompt_color
+
+    # want to be able to do ">>> pp(var)"
+    from pprint import pprint as pp  # NOQA
