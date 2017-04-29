@@ -59,8 +59,17 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
     # ---API
     # =================================================================
 
-    # tab completion and history
+    # tab completion
     def autocomplete():
+        import readline
+        import sys
+        if sys.platform.startswith("darwin"):
+            readline.parse_and_bind("bind ^I rl_complete")
+        else:
+            readline.parse_and_bind('tab: complete')
+
+    # commands history
+    def history():
         import atexit
         import os
         import readline
@@ -77,11 +86,6 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
         if os.path.exists(HIST_FILE):
             readline.read_history_file(HIST_FILE)
 
-        if sys.platform.startswith("darwin"):
-            readline.parse_and_bind("bind ^I rl_complete")
-        else:
-            readline.parse_and_bind('tab: complete')
-
     # colored tracebacks
     def tb_colors():
         try:
@@ -97,16 +101,15 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
         import sys
         sys.ps1 = '\033[01;34m>>>\033[00m '
 
-    # =================================================================
-    # --- installation
-    # =================================================================
-
+    # install
     autocomplete()
+    history()
     tb_colors()
     prompt_color()
 
     # cleanup namespace
-    del autocomplete, tb_colors, _term_supports_colors, _hilite, prompt_color
+    del _hilite, prompt_color
+    del autocomplete, history, tb_colors, prompt_color
 
     # want to be able to do ">>> pp(var)"
     from pprint import pprint as pp  # NOQA
