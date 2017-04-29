@@ -17,9 +17,9 @@ This will do the following:
 * `make sysinstall`: install all basic system deps (e.g. python, gcc, sudo)
 * `make sysconfig`: config system preferences (e.g. add user to sudoers)
 * `make userconfig`: symlinks user config files to this cloned repository  (e.g.
-  [.bashrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.bashrc),
-  [.vimrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.vimrc),
-  [.gitconfig](https://github.com/giampaolo/sysconf/blob/master/static/home/.gitconfig)
+  [.bashrc](https://github.com/giampaolo/sysconf/blob/master/home/.bashrc),
+  [.vimrc](https://github.com/giampaolo/sysconf/blob/master/home/.vimrc),
+  [.gitconfig](https://github.com/giampaolo/sysconf/blob/master/home/.gitconfig)
   and others).
 * `make install`: install this package (that means you'll get
    [bin/grep.py](https://github.com/giampaolo/sysconf/blob/master/bin/grep.py),
@@ -39,9 +39,9 @@ be aware!
 Interesting stand-alone parts which may be useful
 =================================================
 
-* [home/.bashrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.bashrc)
-* [home/.vimrc](https://github.com/giampaolo/sysconf/blob/master/static/home/.vimrc)
-* [home/.pythonstart](https://github.com/giampaolo/sysconf/blob/master/static/home/.pythonstart): auto-completion for the interatctive interpreter
+* [home/.bashrc](https://github.com/giampaolo/sysconf/blob/master/home/.bashrc)
+* [home/.vimrc](https://github.com/giampaolo/sysconf/blob/master/home/.vimrc)
+* [home/.pythonstart](https://github.com/giampaolo/sysconf/blob/master/home/.pythonstart): auto-completion for the interatctive interpreter
 * [bin/grep.py](https://github.com/giampaolo/sysconf/blob/master/bin/grep.py):
   a clone of "ack" command but simpler.
 * [bin/codestats.py](https://github.com/giampaolo/sysconf/blob/master/bin/codestats.py):

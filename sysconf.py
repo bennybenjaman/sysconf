@@ -28,9 +28,8 @@ PY3 = sys.version_info[0] == 3
 
 DIR_ROOT = HERE
 DIR_BIN = os.path.join(DIR_ROOT, 'bin')
-DIR_STATIC = os.path.join(DIR_ROOT, 'static')
-DIR_STATIC_HOME = os.path.join(DIR_ROOT, 'static/home')
-DIR_HOME = os.path.expanduser("~")
+DIR_HOME = os.path.join(DIR_ROOT, 'home')
+DIR_USER_HOME = os.path.expanduser("~")
 
 
 # =============================================================================

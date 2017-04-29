@@ -705,6 +705,18 @@ sh-git-merge-upstream() {
     git merge upstream/master
 }
 
+# Given a PR published by someone on GIT, checkout that PR for local testing.
+# Note: there's apparently no way to commit and push after that unless
+# the user grants you permission against his/her fork.
+sh-git-checkout-pr() {
+    if [ -z "$1" ] ; then
+        echo "usage: sh-git-checkout-pr <PR-number>"
+        return
+    fi
+    git fetch origin pull/$1/head:pr-$1
+    git checkout pr-$1
+}
+
 
 # ===========================================================================
 # Virtualbox
