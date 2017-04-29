@@ -20,12 +20,15 @@ def main():
     import readline
     import sys
 
+    # configurable defaults
+    HISTORY_FILE = os.path.expanduser("~/.pyhistory")
+    HISTORY_LENGTH = 10000
+    PROMPT_COLOR = "34"
+    COLORS = True
+
     # =================================================================
     # --- utils
     # =================================================================
-
-    HISTORY_FILE = os.path.expanduser("~/.pyhistory")
-    HISTORY_LENGTH = 10000
 
     def term_supports_colors():
         file = sys.stdout
@@ -39,11 +42,11 @@ def main():
         else:
             return True
 
-    TERM_SUPPORTS_COLORS = term_supports_colors()
+    COLORS = COLORS and term_supports_colors()
 
     def hilite(s, ok=True, bold=False):
         """Return an highlighted version of 'string'."""
-        if not TERM_SUPPORTS_COLORS:
+        if not COLORS:
             return s
         attr = []
         if ok is None:  # no color
@@ -70,7 +73,6 @@ def main():
     # commands history
     @atexit.register
     def save_history():
-        import readline
         readline.set_history_length(HISTORY_LENGTH)
         readline.write_history_file(HISTORY_FILE)
     try:
@@ -78,18 +80,18 @@ def main():
     except IOError:
         pass
 
-    # colored tracebacks
-    try:
-        # requires 'pip install colored_traceback'
-        import colored_traceback
-    except ImportError:
-        print(hilite("'colored_traceback module is not installed", ok=0))
-    else:
-        colored_traceback.add_hook(always=True)
+    if COLORS:
+        # colored tracebacks
+        try:
+            # requires 'pip install colored_traceback'
+            import colored_traceback
+        except ImportError:
+            print(hilite("'colored_traceback module is not installed", ok=0))
+        else:
+            colored_traceback.add_hook(always=True)
 
-    # set ">>>" color
-    if TERM_SUPPORTS_COLORS:
-        sys.ps1 = '\033[01;34m>>>\033[00m '
+        # set ">>>" prompt color
+        sys.ps1 = '\033[01;%sm>>>\033[00m ' % PROMPT_COLOR
 
 
 if not hasattr(__name__, "__file__"):  # interactive interpreter mode
