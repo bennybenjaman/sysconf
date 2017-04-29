@@ -26,10 +26,6 @@ def main():
     PROMPT_COLOR = "34"
     COLORS = True
 
-    # =================================================================
-    # --- utils
-    # =================================================================
-
     def term_supports_colors():
         file = sys.stdout
         try:
@@ -58,10 +54,6 @@ def main():
         if bold:
             attr.append('1')
         return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
-
-    # =================================================================
-    # --- OK, here we go
-    # =================================================================
 
     # tab completion
     import rlcompleter  # NOQA - this is necessary
