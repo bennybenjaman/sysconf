@@ -25,4 +25,4 @@ alias h !print help(%1)
 !import os, sys
 !PY3 = sys.version_info[0] == 3
 !PYFILE = os.path.expanduser("~/.pdbrc.py")
-!exec(open(PYFILE).read()) if PY3 else execfile(PYFILE)
+!eval("exec(open(PYFILE).read())") if PY3 else execfile(PYFILE)
