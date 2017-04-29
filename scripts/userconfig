@@ -5,8 +5,8 @@ from os.path import exists, join, normpath, dirname, isfile, isdir
 
 from sysconf import BSD
 from sysconf import cwd
-from sysconf import DIR_USER_HOME
 from sysconf import DIR_HOME
+from sysconf import DIR_USER_HOME
 from sysconf import is_x_running
 from sysconf import LINUX
 from sysconf import log
