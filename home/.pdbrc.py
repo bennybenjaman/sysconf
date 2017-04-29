@@ -13,7 +13,8 @@ def main():
     # --- utils
     # =================================================================
 
-    HISTFILE = os.path.expanduser("~/.pyhistory")
+    HISTORY_FILE = os.path.expanduser("~/.pyhistory")
+    HISTORY_LENGTH = 10000
 
     def term_supports_colors():
         file = sys.stdout
@@ -58,16 +59,18 @@ def main():
         readline.parse_and_bind('tab: complete')
 
     # load history
-    if os.path.exists(HISTFILE):
-        readline.read_history_file(HISTFILE)
+    try:
+        readline.read_history_file(HISTORY_FILE)
+    except IOError:
+        pass
 
     # save history on exit
     def save_history(path):
         import readline;
-        readline.set_history_length(10000)
+        readline.set_history_length(HISTORY_LENGTH)
         readline.write_history_file(path)
 
-    atexit.register(save_history, HISTFILE)
+    atexit.register(save_history, HISTORY_FILE)
 
     # Taken from https://gist.github.com/1125049
     # There are a couple of edge cases where you can lose terminal
@@ -75,7 +78,8 @@ def main():
     termios_fd = sys.stdin.fileno()
     termios_echo = termios.tcgetattr(termios_fd)
     termios_echo[3] = termios_echo[3] | termios.ECHO
-    termios_result = termios.tcsetattr(termios_fd, termios.TCSADRAIN, termios_echo)
+    termios_result = termios.tcsetattr(
+        termios_fd, termios.TCSADRAIN, termios_echo)
 
     help_ = textwrap.dedent("""\
         h(elp) [obj]  : same as help(obj)

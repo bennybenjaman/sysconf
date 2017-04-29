@@ -2,36 +2,32 @@
 
 """
 This script is executed when python is started in interpreter mode.
+Just put it in ~/.pythonstart.
 
 Adds:
-- auto-completion
+- tab auto completion
 - history
 - colored tracebacks
 - colored ">>>" prompt
-
-Installation:
-
-    $ wget http://code.activestate.com/recipes/578098/download/1/ -O ~/.pythonstart
-    $ echo "export PYTHONSTARTUP=~/.pythonstart" >> ~/.bashrc
-    $ source ~/.bashrc
 
 Author: Giampaolo Rodola' <g.rodola [AT] gmail [DOT] com>
 License: MIT
 """
 
-if not hasattr(__name__, "__file__"):  # interactive interpreter mode
+def main():
     import atexit
     import os
     import readline
-    import rlcompleter  # NOQA
     import sys
 
     # =================================================================
     # --- utils
     # =================================================================
 
-    def _term_supports_colors():
-        import sys
+    HISTORY_FILE = os.path.expanduser("~/.pyhistory")
+    HISTORY_LENGTH = 10000
+
+    def term_supports_colors():
         file = sys.stdout
         try:
             import curses
@@ -43,71 +39,61 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
         else:
             return True
 
-    if _term_supports_colors():
-        def _hilite(s, ok=True, bold=False):
-            """Return an highlighted version of 'string'."""
-            attr = []
-            if ok is None:  # no color
-                pass
-            elif ok:   # green
-                attr.append('32')
-            else:   # red
-                attr.append('31')
-            if bold:
-                attr.append('1')
-            return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
-    else:
-        def _hilite(s, *a, **k):
+    TERM_SUPPORTS_COLORS = term_supports_colors()
+
+    def hilite(s, ok=True, bold=False):
+        """Return an highlighted version of 'string'."""
+        if not TERM_SUPPORTS_COLORS:
             return s
+        attr = []
+        if ok is None:  # no color
+            pass
+        elif ok:   # green
+            attr.append('32')
+        else:   # red
+            attr.append('31')
+        if bold:
+            attr.append('1')
+        return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), s)
 
     # =================================================================
-    # ---API
+    # --- OK, here we go
     # =================================================================
 
     # tab completion
-    def autocomplete():
-        if sys.platform.startswith("darwin"):
-            readline.parse_and_bind("bind ^I rl_complete")
-        else:
-            readline.parse_and_bind('tab: complete')
+    import rlcompleter  # NOQA - this is necessary
+    if sys.platform.startswith("darwin"):
+        readline.parse_and_bind("bind ^I rl_complete")
+    else:
+        readline.parse_and_bind('tab: complete')
 
     # commands history
-    def history():
-        HIST_FILE = os.path.expanduser("~/.pyhistory")
-
-        @atexit.register
-        def save_history():
-            import readline
-            readline.set_history_length(10000)
-            readline.write_history_file(HIST_FILE)
-
-        if os.path.exists(HIST_FILE):
-            readline.read_history_file(HIST_FILE)
+    @atexit.register
+    def save_history():
+        import readline
+        readline.set_history_length(HISTORY_LENGTH)
+        readline.write_history_file(HISTORY_FILE)
+    try:
+        readline.read_history_file(HISTORY_FILE)
+    except IOError:
+        pass
 
     # colored tracebacks
-    def tb_colors():
-        try:
-            # requires 'pip install colored_traceback'
-            import colored_traceback
-        except ImportError:
-            print(_hilite('colored_traceback module not installed', ok=0))
-        else:
-            colored_traceback.add_hook(always=True)
+    try:
+        # requires 'pip install colored_traceback'
+        import colored_traceback
+    except ImportError:
+        print(hilite("'colored_traceback module is not installed", ok=0))
+    else:
+        colored_traceback.add_hook(always=True)
 
     # set ">>>" color
-    def prompt_color():
+    if TERM_SUPPORTS_COLORS:
         sys.ps1 = '\033[01;34m>>>\033[00m '
 
-    # install
-    autocomplete()
-    history()
-    tb_colors()
-    prompt_color()
 
-    # cleanup namespace
-    del atexit, os, readline, rlcompleter, sys
-    del _term_supports_colors, _hilite
-    del autocomplete, history, tb_colors, prompt_color
-
+if not hasattr(__name__, "__file__"):  # interactive interpreter mode
+    main()
+    del main
     # want to be able to do ">>> pp(var)"
     from pprint import pprint as pp  # NOQA
