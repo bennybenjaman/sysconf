@@ -20,6 +20,11 @@ License: MIT
 """
 
 if not hasattr(__name__, "__file__"):  # interactive interpreter mode
+    import atexit
+    import os
+    import readline
+    import rlcompleter  # NOQA
+    import sys
 
     # =================================================================
     # --- utils
@@ -61,8 +66,6 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
 
     # tab completion
     def autocomplete():
-        import readline
-        import sys
         if sys.platform.startswith("darwin"):
             readline.parse_and_bind("bind ^I rl_complete")
         else:
@@ -70,16 +73,11 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
 
     # commands history
     def history():
-        import atexit
-        import os
-        import readline
-        import rlcompleter  # NOQA
-        import sys
-
         HIST_FILE = os.path.expanduser("~/.pyhistory")
 
         @atexit.register
         def save_history():
+            import readline
             readline.set_history_length(10000)
             readline.write_history_file(HIST_FILE)
 
@@ -98,7 +96,6 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
 
     # set ">>>" color
     def prompt_color():
-        import sys
         sys.ps1 = '\033[01;34m>>>\033[00m '
 
     # install
@@ -108,7 +105,8 @@ if not hasattr(__name__, "__file__"):  # interactive interpreter mode
     prompt_color()
 
     # cleanup namespace
-    del _hilite, prompt_color
+    del atexit, os, readline, rlcompleter, sys
+    del _term_supports_colors, _hilite
     del autocomplete, history, tb_colors, prompt_color
 
     # want to be able to do ">>> pp(var)"
