@@ -18,36 +18,11 @@ alias ppio pp [a.__dict__ for a in %1]
 alias help !print help(%1)
 alias h !print help(%1)
 
-
 # ===================================================================
 # Python
 # ===================================================================
 
-!import atexit
-!import os
-!import readline
-!import rlcompleter
-!import sys
-!import termios
-
-!HISTFILE = os.path.expanduser("~/.pyhistory")
-
-# Enable tab-completion of builtin objects (len, Exception, etc).
-!pdb.Pdb.complete = rlcompleter.Completer(locals()).complete
-
-# Load history.
-!if os.path.exists(HISTFILE): readline.read_history_file(HISTFILE)
-!readline.parse_and_bind('tab: complete')
-
-# Save history on exit.
-# !atexit.register(readline.write_history_file, HISTFILE)
-!def save_history(path): import readline; readline.write_history_file(path)
-!atexit.register(save_history, HISTFILE)
-
-# Taken from https://gist.github.com/1125049
-# There are a couple of edge cases where you can lose terminal
-# echo. This should restore it next time you open a pdb.
-!termios_fd = sys.stdin.fileno()
-!termios_echo = termios.tcgetattr(termios_fd)
-!termios_echo[3] = termios_echo[3] | termios.ECHO
-!termios_result = termios.tcsetattr(termios_fd, termios.TCSADRAIN, termios_echo)
+!import os, sys
+!PY3 = sys.version_info[0] == 3
+!PYFILE = os.path.expanduser("~/.pdbrc.py")
+!exec(open(PYFILE).read()) if PY3 else execfile(PYFILE)
