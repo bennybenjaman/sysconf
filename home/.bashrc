@@ -98,7 +98,6 @@ if type -P xclip > /dev/null; then
     alias "v=xclip -o"
 fi
 
-
 # ===================================================================
 # Custom settings
 # ===================================================================
@@ -271,7 +270,6 @@ realpath() {
     python -c "import os; print(os.path.realpath(os.path.normpath('$1')))"
 }
 
-
 # ===================================================================
 # User defined utility functions start here.
 # All starts with "sh-" namespace so that I won't pollute PATH namespace.
@@ -311,7 +309,6 @@ sh-py-clean-build-files() {
         $(which rm) -rf dist
     fi
 }
-
 
 # install python for the given python version
 sh-py-install-pip() {
@@ -379,7 +376,6 @@ sh-py-pip-upgrade-all() {
     pip freeze --local | grep -v '^\-e' | cut -d = -f 1  | xargs pip install -U --user
 }
 
-
 # ===================================================================
 # Network
 # ===================================================================
@@ -387,13 +383,11 @@ sh-py-pip-upgrade-all() {
 alias sh-net-netstat-listen='sudo netstat -antp | grep LISTEN'
 alias sh-net-ping-google='ping google.com'
 
-
 # reset network
 sh-net-reset() {
     sudo /etc/init.d/networking restart
     sudo /etc/init.d/network-manager restart
 }
-
 
 # ...in case wget/curl are missing
 # usage: sh-net-httpfetch <url> [<file>]
@@ -447,12 +441,10 @@ if 1:
 END
 }
 
-
 # show public ip
 sh-net-myip() {
     sh-net-httpfetch icanhazip.com
 }
-
 
 # add your public SSH key to a remote host
 sh-net-scp-ssh-keys() {
@@ -462,7 +454,6 @@ sh-net-scp-ssh-keys() {
     fi
     scp ~/.ssh/* $1@$2:~/.ssh/
 }
-
 
 # ===================================================================
 # Packages
@@ -552,7 +543,6 @@ sh-pkg-search() {
     fi
 }
 
-
 # search package
 sh-pkg-list-installed() {
     # ubuntu / debian
@@ -571,7 +561,6 @@ sh-pkg-list-installed() {
         echo "system not supported"
     fi
 }
-
 
 # shows apt history
 if type -P dpkg > /dev/null; then
@@ -596,13 +585,11 @@ if type -P dpkg > /dev/null; then
     }
 fi
 
-
 sh-cleanup-system() {
     sudo apt-get autoremove
     sudo apt-get clean
     sudo apt-get autoclean
 }
-
 
 sh-cleanup-chrome() {
     sudo apt-get purge -y google-chrome*
@@ -611,7 +598,6 @@ sh-cleanup-chrome() {
     sudo rm -rf /etc/chromium-browser
     sudo apt-get install -y google-chrome-stable
 }
-
 
 # ===================================================================
 # Paths
@@ -640,7 +626,6 @@ sh-path-arch-extract() {
     fi
 }
 
-
 # print size path
 sh-path-size() {
     if [ -z "$1" ]; then
@@ -650,11 +635,9 @@ sh-path-size() {
     du -hs $1
 }
 
-
 # ===========================================================================
 # Sublime
 # ===========================================================================
-
 
 # Remove session file, so that next time subl is opened it will not load
 # previosly opened files/tabs.
@@ -663,18 +646,15 @@ sh-subl-rm-session() {
     rm -f ~/.config/sublime-text-3/Local/Auto\ Save\ Session.sublime_session
 }
 
-
 # ===========================================================================
 # Github
 # ===========================================================================
-
 
 # Get the base github url of this GIT project.
 _sh_github_print_prj_url() {
     git remote -v | awk '/fetch/{print $2}' | sed -re 's#(git@|git://)#https://#' -e '   s@com:@com/@' | head -n1 | sed "s/....$//"
 
 }
-
 
 # Open the browser to the github page which shows the diff between this
 # GIT branch and master, e.g.:
@@ -685,7 +665,6 @@ sh-github-diff-branch() {
     url="$base_url/compare/master...$branch_name#files_bucket"
     echo $url | xargs google-chrome
 }
-
 
 # Print GIT authors.
 sh-git-stats-authors() {
@@ -717,6 +696,9 @@ sh-git-checkout-pr() {
     git checkout pr-$1
 }
 
+sh-git-undo-last-commit() {
+    git reset HEAD^
+}
 
 # ===========================================================================
 # Virtualbox
@@ -726,7 +708,6 @@ sh-git-checkout-pr() {
 sh-vbox-list-running() {
     VBoxManage list runningvms
 }
-
 
 # ===========================================================================
 # Others
@@ -800,7 +781,6 @@ _print_sysinfo() {
     echo -e "Python: `python -c 'import sys; sys.stdout.write(sys.version.split()[0])'`"
     echo -en "${_nc}"
 }
-
 
 # ===================================================================
 # Final stuff
