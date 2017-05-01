@@ -56,7 +56,6 @@ def main():
 
         # install sublime pkg manager
         safe_makedirs(SUBL_INSTPKGDIR)
-        import pdb; pdb.set_trace()
         with cwd(SUBL_INSTPKGDIR):
             if not exists('Package Control.sublime-package'):
                 logtitle("downloading and install sublime pkg manager")
