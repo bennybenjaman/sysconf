@@ -49,17 +49,14 @@ def main():
     symlink_path('.config/transmission/settings.json')
 
     # configure sublime
-    if LINUX:
-        if not is_x_running():
-            logerr('sublime', "X server not running")
-            return
-
+    if LINUX and is_x_running():
         # config files
         logtitle("symlinking sublime config files")
         symlink_path('.config/sublime-text-3/Packages/User')
 
         # install sublime pkg manager
         safe_makedirs(SUBL_INSTPKGDIR)
+        import pdb; pdb.set_trace()
         with cwd(SUBL_INSTPKGDIR):
             if not exists('Package Control.sublime-package'):
                 logtitle("downloading and install sublime pkg manager")
