@@ -460,7 +460,7 @@ sh-net-scp-ssh-keys() {
 # ===================================================================
 
 # install package
-sh-install() {
+sh-pkg-install() {
     if [ "$(id -u)" != "0" ]; then
         if command_exists 'sudo' ; then
             SUDO="sudo"
@@ -495,7 +495,7 @@ sh-install() {
 }
 
 # remove package
-sh-uninstall() {
+sh-pkg-uninstall() {
     if [ -z "$1" ]; then
         echo "usage: sh-pkg-uninstall <pkg-name> "
         return
@@ -585,18 +585,10 @@ if type -P dpkg > /dev/null; then
     }
 fi
 
-sh-cleanup-system() {
+sh-pkg-cleanup() {
     sudo apt-get autoremove
     sudo apt-get clean
     sudo apt-get autoclean
-}
-
-sh-cleanup-chrome() {
-    sudo apt-get purge -y google-chrome*
-    rm -rf ~/.config/google-chrome/
-    rm -rf ~/.cache/google-chrome/
-    sudo rm -rf /etc/chromium-browser
-    sudo apt-get install -y google-chrome-stable
 }
 
 # ===================================================================
@@ -636,7 +628,7 @@ sh-path-size() {
 }
 
 # ===========================================================================
-# Sublime
+# Apps
 # ===========================================================================
 
 # Remove session file, so that next time subl is opened it will not load
@@ -644,6 +636,14 @@ sh-path-size() {
 sh-subl-rm-session() {
     rm -f ~/.config/sublime-text-3/Local/Session.sublime_session
     rm -f ~/.config/sublime-text-3/Local/Auto\ Save\ Session.sublime_session
+}
+
+sh-chrome-cleanup() {
+    sudo apt-get purge -y google-chrome*
+    rm -rf ~/.config/google-chrome/
+    rm -rf ~/.cache/google-chrome/
+    sudo rm -rf /etc/chromium-browser
+    sudo apt-get install -y google-chrome-stable
 }
 
 # ===========================================================================
