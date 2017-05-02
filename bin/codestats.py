@@ -7,10 +7,11 @@
 Print statistics about a code project.
 
 Usage:
-    codestats.py [-d]
+    codestats.py [-d] [-v]
 
 Options:
     -d --debug         # print debug output
+    -v --verbose       # print more details
 """
 
 from __future__ import print_function, division
@@ -96,6 +97,7 @@ SHEBANGS = {
     '#!/usr/bin/ruby': '.rb',
 }
 DEBUG = False
+VERBOSE = False
 
 
 # ===================================================================
@@ -245,10 +247,11 @@ def get_file_ext(file):
 
 def main():
     # setup
-    global DEBUG
+    global DEBUG, VERBOSE
 
     args = docopt(__doc__)
     DEBUG = args['--debug']
+    VERBOSE = args['--verbose']
     stats = collections.defaultdict(int)
     files = get_src_files()
 
@@ -282,8 +285,13 @@ def main():
         first_commit = sh(r"git show -s --format=%ar " + first_cset)
         print("first commit:  %29s" % first_commit)
         print("committers:   %30s" % len(committers.split('\n')))
-        print("top 5 committers: ")
-        for line in committers.split('\n')[:5]:
+        if not VERBOSE:
+            print("top 5 committers: ")
+            committers = committers.split('\n')[:5]
+        else:
+            print("committers: ")
+            committers = committers.split('\n')
+        for line in committers:
             commits, author = line.strip().split('\t')
             print("  %-30s %11s" % (author, commits))
 
