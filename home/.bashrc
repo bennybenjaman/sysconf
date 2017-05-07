@@ -270,10 +270,16 @@ realpath() {
     python -c "import os; print(os.path.realpath(os.path.normpath('$1')))"
 }
 
-# ===================================================================
+# *********************************************************************
 # User defined utility functions start here.
 # All starts with "sh-" namespace so that I won't pollute PATH namespace.
-# ===================================================================
+# List them with "sh-help".
+# *********************************************************************
+
+# List of the custom cmds defined below.
+sh-help() {
+    declare -F | grep "sh-" | cut -c 12-
+}
 
 # ===================================================================
 # Dev / Python
@@ -476,7 +482,7 @@ sh-pkg-install() {
     if command_exists "apt-get"; then
         $SUDO apt-get install $1
     # osx
-    elif echo `uname -a` | grep -i 'darwin'; then
+    elif [[ $PLATFORM == *darwin* ]]; then
         if ! command_exists 'brew' ; then
             ruby -e "$(curl -fsSkL raw.github.com/mistydemeo/tigerbrew/go/install)"
             # fix for https://github.com/Homebrew/legacy-homebrew/issues/9953
@@ -484,13 +490,14 @@ sh-pkg-install() {
         fi
         $SUDO brew install $1
     # solaris
-    elif command_exists "pkg"; then
+    elif [[ $PLATFORM == *sunos* ]] || [[ $PLATFORM == *solaris* ]]; then
         $SUDO pkg install $1
     # freebsd
-    elif command_exists "pkg_add"; then
+    elif [[ $PLATFORM == *freebsd* ]]; then
         $SUDO pkg_add -r $1
     else
         echo "system not supported"
+        exit 1
     fi
 }
 
@@ -633,18 +640,24 @@ sh-path-size() {
 
 # Remove session file, so that next time subl is opened it will not load
 # previosly opened files/tabs.
-sh-subl-rm-session() {
+sh-app-subl-rm-session() {
     rm -f ~/.config/sublime-text-3/Local/Session.sublime_session
     rm -f ~/.config/sublime-text-3/Local/Auto\ Save\ Session.sublime_session
 }
 
-sh-chrome-cleanup() {
+sh-app-chrome-cleanup() {
     sudo apt-get purge -y google-chrome*
     rm -rf ~/.config/google-chrome/
     rm -rf ~/.cache/google-chrome/
     sudo rm -rf /etc/chromium-browser
     sudo apt-get install -y google-chrome-stable
 }
+
+# List running VMs
+sh-app-vbox-list-running() {
+    VBoxManage list runningvms
+}
+
 
 # ===========================================================================
 # Github
@@ -659,7 +672,7 @@ _sh_github_print_prj_url() {
 # Open the browser to the github page which shows the diff between this
 # GIT branch and master, e.g.:
 # https://github.com/giampaolo/psutil/compare/master...oneshot#files_bucket
-sh-github-diff-branch() {
+sh-git-diff-branch() {
     base_url=`_sh_github_print_prj_url`
     branch_name=`git rev-parse --abbrev-ref HEAD`
     url="$base_url/compare/master...$branch_name#files_bucket"
@@ -667,12 +680,12 @@ sh-github-diff-branch() {
 }
 
 # Print GIT authors.
-sh-git-stats-authors() {
+sh-git-list-authors() {
     git shortlog -sn
 }
 
 # Print files which are not under revision control.
-sh-git-unrevisioned-files() {
+sh-git-list-unrevisioned-files() {
     git ls-files --others --ignored --exclude-from=.gitignore
 }
 
@@ -701,20 +714,16 @@ sh-git-undo-last-commit() {
 }
 
 # ===========================================================================
-# Virtualbox
+# System
 # ===========================================================================
 
-# List running VMs
-sh-vbox-list-running() {
-    VBoxManage list runningvms
+sh-sys-clean-swap() {
+    sudo swapoff -a
+    sudo swapon -a
 }
 
-# ===========================================================================
-# Others
-# ===========================================================================
-
 # Set audio volume.
-sh-volume() {
+sh-sys-volume() {
     if [ -z "$1" ] ; then
         echo "usage: sh-volume <volume-percent>"
         return
