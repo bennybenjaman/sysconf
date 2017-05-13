@@ -98,6 +98,20 @@ if type -P xclip > /dev/null; then
     alias "v=xclip -o"
 fi
 
+# override make to add colors on warnings
+colormake() {
+    if ! command_exists 'make' ; then
+        echo "make is not installed (I'm .bashrc BTW)"
+        exit 1
+    fi
+    pathpat="(/[^/]*)+:[0-9]+"
+    ccred=$(echo -e "\033[0;31m")
+    ccyellow=$(echo -e "\033[0;33m")
+    ccend=$(echo -e "\033[0m")
+    $(which make) "$@" 2>&1 | sed -E -e "/[Ee]rror[: ]/ s%$pathpat%$ccred&$ccend%g" -e "/[Ww]arning[: ]/ s%$pathpat%$ccyellow&$ccend%g"
+}
+
+
 # ===================================================================
 # Custom settings
 # ===================================================================
@@ -268,20 +282,6 @@ realpath() {
         return
     fi
     python -c "import os; print(os.path.realpath(os.path.normpath('$1')))"
-}
-
-# override make to add colors on warnings
-make() {
-    if ! command_exists 'make' ; then
-        echo "make is not installed (I'm .bashrc BTW)"
-        exit 1
-    fi
-    pathpat="(/[^/]*)+:[0-9]+"
-    ccred=$(echo -e "\033[0;31m")
-    ccyellow=$(echo -e "\033[0;33m")
-    ccend=$(echo -e "\033[0m")
-    $(which make) "$@" 2>&1 | sed -E -e "/[Ee]rror[: ]/ s%$pathpat%$ccred&$ccend%g" -e "/[Ww]arning[: ]/ s%$pathpat%$ccyellow&$ccend%g"
-    return ${PIPESTATUS[0]}
 }
 
 # *********************************************************************
@@ -511,7 +511,6 @@ sh-pkg-install() {
         $SUDO pkg install $1
     else
         echo "system not supported"
-        exit 1
     fi
 }
 
