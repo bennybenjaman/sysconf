@@ -289,7 +289,6 @@ def main():
             print("top 5 committers: ")
             committers = committers.split('\n')[:5]
         else:
-            print("committers: ")
             committers = committers.split('\n')
         for line in committers:
             commits, author = line.strip().split('\t')
