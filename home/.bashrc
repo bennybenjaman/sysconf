@@ -730,6 +730,11 @@ sh-git-undo-last-commit() {
 # System
 # ===========================================================================
 
+sh-sys-upgrade() {
+    sudo apt-get update
+    sudo apt-get dist-upgrade -y
+}
+
 sh-sys-clean-swap() {
     sudo swapoff -a
     sudo swapon -a

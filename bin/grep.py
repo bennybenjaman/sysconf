@@ -8,7 +8,7 @@
 
 """
 Recursively search a string occurrence in all files of this directory.
-Very similar to "ack" command, just simpler.
+Similar to "ack" (https://beyondgrep.com/), just simpler.
 Features:
  * simple search
  * case insensitive search
@@ -23,7 +23,8 @@ Usage:
 Options:
     -r --replace              # replace 2 patterns
     -i --ignore-case          # case insensitive
-    -e <EXTS> --exts=<EXTS>   # a list of comma separated extensions default=%s
+    -e <EXTS> --exts=<EXTS>   # a list of comma separated extensions;
+                              # default=%s
     -o --open                 # open files in editor
     -n <N> --nlines=<N>       # number of lines to print above and below
 
@@ -51,11 +52,13 @@ if PY3:
 TERMINAL_SIZE_FALLBACK = 2
 DEFAULT_EXTS = [
     'c',
+    'cpp'
     'h',
     'in',
     'ini',
     'md',
     'py',
+    'pyx',
     'rst',
     'txt',
     'yaml',
