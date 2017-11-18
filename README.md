@@ -8,7 +8,7 @@ Installation
 
 On a brand new system you really want to do:
 
-```
+```bash
 make all
 ```
 
@@ -28,7 +28,7 @@ This will do the following:
 
 If GIT is not installed and you can't clone this repo do:
 
-```
+```bash
 wget https://github.com/giampaolo/sysconf/tarball/master && tar zxvf master
 eval $(ssh-agent)  # do not prompt password on GIT push
 ```
